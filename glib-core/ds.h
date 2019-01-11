@@ -163,6 +163,10 @@ public:
   const TVal1& GetVal1() const { return Val1;}
   const TVal2& GetVal2() const { return Val2;}
   const TVal3& GetVal3() const { return Val3;}
+
+  TStr GetStr() const {
+	  return TStr("Triple(") + Val1.GetStr() + ", " + Val2.GetStr() + ", " + Val3.GetStr() + ")";
+  }
 };
 
 typedef TTriple<TCh, TCh, TCh> TChTr;
