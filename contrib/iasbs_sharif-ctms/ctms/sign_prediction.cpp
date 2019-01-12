@@ -764,8 +764,8 @@ void TSignPredicNoLrn::GetTheta(const TIntV& TrnIndices, THash<TChA, TFlt>& thta
 		const int EId = DataSet.GetKeyId(CurE);
 		if (CurE.Val3 == 1) {PosEListSize++;}
 
-		const THash<TInt, TInt>& curEFeaVals = DataSet[EId];
-		for (int j = 0; j < curEFeaVals.Len(); j++) {
+		const THash<TInt, TInt>& curEFeaVals = DataSet[EId];		
+		for (int j = 0; j < curEFeaVals.Len(); j++) {			
 			const TChA feaStr = Features[curEFeaVals.GetKey(j)];
 			actualCTMSsCnt(feaStr) += curEFeaVals[j];
 			AllTriadsCnt += curEFeaVals[j];

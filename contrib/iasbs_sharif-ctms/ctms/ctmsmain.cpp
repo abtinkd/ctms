@@ -8,14 +8,14 @@
 // Define drand48 in MS Visual Studio as (0<rnd<1)
 #define drand48() ((double)rand()/(RAND_MAX+1))
 // Input File name and Location
-#define LogDir "../Experimental Results/Temp/"
+#define LogDir "results/"
 #define FileNEpinions "soc-sign-epinions.txt"
 #define FileNSlashdot "soc-sign-Slashdot090221.txt"
 #define FileNWikipedia "wikipedia.txt"
 #define FileNWikipediaRawFormat "wikiElec.ElecBs3.txt"
 #define FileNTest "test.txt"
-#define DATE "94.05.19"
-#define ConsoleToFile true
+#define DATE "2019.01.01"
+#define ConsoleToFile false
 
 using namespace std;
 

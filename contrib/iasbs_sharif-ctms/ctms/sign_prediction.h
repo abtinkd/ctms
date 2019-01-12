@@ -4,7 +4,7 @@
 #include "ctmsnet.h"
 #include <Snap.h>
 #include "ml.h"
-#define OutputDir "../Experimental Results/Temp/"
+#define OutputDir "results/"
 
 struct TPredictionResult {
 	double accuracy, truePositive, trueNegative;
