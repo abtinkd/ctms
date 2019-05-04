@@ -139,10 +139,7 @@ private:
 	TVec<TFltV> Pred;
 	THash<TChA, TFlt> theta;
 	double bNetPosProb;
-private:
-	static int EdgeSig(int FwSgn, int BwSgn);
-	static TChA GetTriadStr(int a[2], int b[2], int c[2]);
-	static TChA GetTriadStr(const PCtmsNet& Nt, int srcId, int dstId, int nbrId, bool IsSigned = true);
+private:	
 	static double CalcEffectiveEsPosProb(const PCtmsNet& Nt);
 	TFlt GetEdgeNaivePrediction(const TIntPr& E) const;
 	void CreateFeatureV();

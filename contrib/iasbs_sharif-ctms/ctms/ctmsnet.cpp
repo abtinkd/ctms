@@ -667,6 +667,126 @@ bool TCtmsNet::IsSameTriad2(const PCtmsNet& Net1, const PCtmsNet& Net2) {
 	return false;
 }
 
+int TCtmsNet::EdgeSig(int e1, int e2) {
+	if (e1 == 0 && e2 == 0) { return 0; }
+	if (e1 == 1 && e2 == 0) { return 1; }
+	if (e1 == -1 && e2 == 0) { return 2; }
+	if (e1 == 0 && e2 == 1) { return 3; }
+	if (e1 == 0 && e2 == -1) { return 4; }
+	if (e1 == 1 && e2 == 1) { return 5; }
+	if (e1 == 1 && e2 == -1) { return 6; }
+	if (e1 == -1 && e2 == 1) { return 7; }
+	if (e1 == -1 && e2 == -1) { return 8; }
+	Fail; return -1;
+}
+
+TChA TCtmsNet::GetTriadStr(int a[2], int b[2], int c[2]) {
+	const int e1 = EdgeSig(a[0], a[1]);
+	const int e2 = EdgeSig(b[0], b[1]);
+	const int e3 = EdgeSig(c[0], c[1]);
+	const TIntTr MnTr1 = TMath::Mn(TIntTr(e1, e2, e3), TIntTr(e2, e3, e1), TIntTr(e3, e1, e2));
+	const int e1a = EdgeSig(c[1], c[0]);
+	const int e2a = EdgeSig(b[1], b[0]);
+	const int e3a = EdgeSig(a[1], a[0]);
+	const TIntTr MinTr = TMath::Mn(MnTr1, TMath::Mn(TIntTr(e1a, e2a, e3a), TIntTr(e2a, e3a, e1a), TIntTr(e3a, e1a, e2a)));
+
+	const TInt EdgNum[] = { MinTr.Val1, MinTr.Val2, MinTr.Val3 };
+	TChA EdgStr[3];
+	for (int i = 0; i < 3; i++) {
+		switch (EdgNum[i]) {
+		case 1: EdgStr[i] = "+o"; break;
+		case 2: EdgStr[i] = "-o"; break;
+		case 3: EdgStr[i] = "o+"; break;
+		case 4: EdgStr[i] = "o-"; break;
+		case 5: EdgStr[i] = "++"; break;
+		case 6: EdgStr[i] = "+-"; break;
+		case 7: EdgStr[i] = "-+"; break;
+		case 8: EdgStr[i] = "--"; break;
+		default: EdgStr[i] = TChA();
+		}
+	}
+	return EdgStr[0] + "|" + EdgStr[1] + "|" + EdgStr[2];
+}
+
+TChA TCtmsNet::GetTriadStr(const PCtmsNet& Nt, int srcId, int dstId, int nbrId, bool IsSigned) {
+	int SDSgn[2] = { 0, 0 }, DNSgn[2] = { 0, 0 }, NSSgn[2] = { 0, 0 };
+	if (IsSigned) {
+		if (Nt->IsEdge(srcId, dstId)) {
+			SDSgn[0] = Nt->GetEDat(srcId, dstId);
+		}
+		if (Nt->IsEdge(dstId, srcId)) {
+			SDSgn[1] = Nt->GetEDat(dstId, srcId);
+		}
+		if (Nt->IsEdge(dstId, nbrId)) {
+			DNSgn[0] = Nt->GetEDat(dstId, nbrId);
+		}
+		if (Nt->IsEdge(nbrId, dstId)) {
+			DNSgn[1] = Nt->GetEDat(nbrId, dstId);
+		}
+		if (Nt->IsEdge(nbrId, srcId)) {
+			NSSgn[0] = Nt->GetEDat(nbrId, srcId);
+		}
+		if (Nt->IsEdge(srcId, nbrId)) {
+			NSSgn[1] = Nt->GetEDat(srcId, nbrId);
+		}
+	}
+	else {
+		if (Nt->IsEdge(srcId, dstId)) {
+			SDSgn[0] = 1;
+		}
+		if (Nt->IsEdge(dstId, srcId)) {
+			SDSgn[1] = 1;
+		}
+		if (Nt->IsEdge(dstId, nbrId)) {
+			DNSgn[0] = 1;
+		}
+		if (Nt->IsEdge(nbrId, dstId)) {
+			DNSgn[1] = 1;
+		}
+		if (Nt->IsEdge(nbrId, srcId)) {
+			NSSgn[0] = 1;
+		}
+		if (Nt->IsEdge(srcId, nbrId)) {
+			NSSgn[1] = 1;
+		}
+	}
+	//return GetTriadStr(SDSgn, DNSgn, NSSgn);
+	int *a = SDSgn, *b = DNSgn, *c = NSSgn;
+	const int e1 = EdgeSig(a[0], a[1]);
+	const int e2 = EdgeSig(b[0], b[1]);
+	const int e3 = EdgeSig(c[0], c[1]);
+	const TIntTr MnTr1 = TMath::Mn(TIntTr(e1, e2, e3), TIntTr(e2, e3, e1), TIntTr(e3, e1, e2));
+	const int e1a = EdgeSig(c[1], c[0]);
+	const int e2a = EdgeSig(b[1], b[0]);
+	const int e3a = EdgeSig(a[1], a[0]);
+	const TIntTr MinTr = TMath::Mn(MnTr1, TMath::Mn(TIntTr(e1a, e2a, e3a), TIntTr(e2a, e3a, e1a), TIntTr(e3a, e1a, e2a)));
+	//return TCtmsNet::GetTriadStr(MinTr);
+	const TInt EdgNum[] = { MinTr.Val1, MinTr.Val2, MinTr.Val3 };
+	TChA EdgStr[3];
+	for (int i = 0; i < 3; i++) {
+		switch (EdgNum[i]) {
+		case 1: EdgStr[i] = "+o"; break;
+		case 2: EdgStr[i] = "-o"; break;
+		case 3: EdgStr[i] = "o+"; break;
+		case 4: EdgStr[i] = "o-"; break;
+		case 5: EdgStr[i] = "++"; break;
+		case 6: EdgStr[i] = "+-"; break;
+		case 7: EdgStr[i] = "-+"; break;
+		case 8: EdgStr[i] = "--"; break;
+		default: EdgStr[i] = TChA();
+		}
+	}
+	return EdgStr[0] + "|" + EdgStr[1] + "|" + EdgStr[2];
+}
+
+TChA TCtmsNet::GetTriadStr() const {
+	TCtmsNet::TNodeI NI = this->BegNI();
+	const int srcNdId = NI.GetId(); NI++;
+	const int dstNdId = NI.GetId(); NI++;
+	const int nbrNdId = NI.GetId();	
+	return TCtmsNet::GetTriadStr(this->GetTriad(srcNdId, dstNdId, nbrNdId), srcNdId, dstNdId, nbrNdId);
+}
+
 void TCtmsNet::GenTriadEquivClasses(TTriadEqClasH& TriadGroups, const bool BiDirEdgeSide, const bool Signed, const bool ZeroEdgeSide) {
 	PCtmsNet Triad;
 	TVec<PCtmsNet> TriadIdV;
@@ -772,8 +892,8 @@ double TCtmsNet::GetTriadProb2(const double& PlusProb) const {
 	if (GetNodes() == 3) {
 		PCtmsNet Triad = CopyNet();
 		Triad->SetAllEDat(1);
-		const int UnSigEqCnt = UnSignedTriadGroups(Triad->GetTriadStr(true)).Val2;
-		const int SigEqCnt = SignedTriadGroups(GetTriadStr(true)).Val2;
+		const int UnSigEqCnt = UnSignedTriadGroups(Triad->GetTriadStr()).Val2;
+		const int SigEqCnt = SignedTriadGroups(GetTriadStr()).Val2;
 		return (SigEqCnt / UnSigEqCnt) * pow(PlusProb, P) * pow(1 - PlusProb, E - P);
 	}
 	return pow(PlusProb, P) * pow(1 - PlusProb, E - P);
@@ -800,10 +920,10 @@ void TCtmsNet::CountSignedTriads2(const TStr& OutFNm) const {
 		for (int n = 0; n < NbrV.Len(); n++) {
 			PCtmsNet TriadNet = GetTriad(EI.GetSrcNId(), EI.GetDstNId(), NbrV[n]);
 			// count signed triad
-			SigEqClasses(TriadNet->GetTriadStr(true)).Val2 += 1;
+			SigEqClasses(TriadNet->GetTriadStr()).Val2 += 1;
 			// count unsigned triads
 			TriadNet->SetAllEDat(1);
-			UnSigEqClasses(TriadNet->GetTriadStr(true)).Val2 += 1;
+			UnSigEqClasses(TriadNet->GetTriadStr()).Val2 += 1;
 		}
 		if (EI() == 1) { AllPlusE += 1; }
 		if (++c % Decile == 0) { printf("."); }
@@ -822,7 +942,7 @@ void TCtmsNet::CountSignedTriads2(const TStr& OutFNm) const {
 		const int E = UnSigEqClasses[u].Val1->GetEdges();
 		UnSigEqClasses[u].Val2 /= E;
 		if (UnSigEqClasses[u].Val2 != 0) { UnSigTriadsClasPresent++; }
-		printf("\n%d. Unsigned triad: %s\t%d", u + 1, UnSigEqClasses[u].Val1->GetTriadStr(true).CStr(), UnSigEqClasses[u].Val2);
+		printf("\n%d. Unsigned triad: %s\t%d", u + 1, UnSigEqClasses[u].Val1->GetTriadStr().CStr(), UnSigEqClasses[u].Val2);
 	}
 	// draw
 	FILE *T = fopen(TStr::Fmt("%s-SignTriad.tab", OutFNm.CStr()).CStr(), "wt");
@@ -843,7 +963,7 @@ void TCtmsNet::CountSignedTriads2(const TStr& OutFNm) const {
 			if (EI() == 1) { PlusE++; }
 		}
 		const double TriadCnt = SigEqClasses[t].Val2;
-		const double UnSignCnt = UnSigEqClasses(TriadNetUnsig->GetTriadStr(true)).Val2;
+		const double UnSignCnt = UnSigEqClasses(TriadNetUnsig->GetTriadStr()).Val2;
 		const double TriadProbInEqCls = TriadNet->GetTriadProb2(PlusProb);
 		const double TriadProb = TriadProbInEqCls * (UnSignCnt / AllTriadsCnt);
 		// number of all isorphic nonsigned triads
@@ -852,7 +972,7 @@ void TCtmsNet::CountSignedTriads2(const TStr& OutFNm) const {
 		fprintf(F, "  label = \"T=%d, E[T]=%d, S=%.1f\";\n}\n", int(TriadCnt), int(ExpCnt), Surp);
 		fclose(F);
 		//TGraphViz::DoLayout(FNm+".dot", FNm+".gif",  gvlNeato);
-		fprintf(T, "%s\t%d\t%.2f\t%.2f\t%f\n", TriadNet->GetTriadStr(true).CStr(), int(TriadCnt), ExpCnt, Surp, TriadProb);
+		fprintf(T, "%s\t%d\t%.2f\t%.2f\t%f\n", TriadNet->GetTriadStr().CStr(), int(TriadCnt), ExpCnt, Surp, TriadProb);
 	}
 	fclose(T);
 	printf("\nall triads Count: %d\n", AllTriadsCnt);
@@ -874,7 +994,7 @@ void TCtmsNet::CountSignedTriads3(const TStr& OutFNm) const {
 	fprintf(T, "AB\tBC\tCA\tCount\tProb\tPermCnt\tPermPr\tRewCnt\tRewPr\n");
 	for (int i = 0; i < NetSigTriDistrib.Len(); i++)
 	{
-		TChA TriClassKey = NetSigTriDistrib[i].Val1->GetTriadStr(true);
+		TChA TriClassKey = NetSigTriDistrib[i].Val1->GetTriadStr();
 		fprintf(T, "%s\t%d\t%f\t%d\t%f\t%d\t%f\n", TriClassKey.CStr(),
 			NetSigTriDistrib(TriClassKey).Val2, NetSigTriDistrib(TriClassKey).Val2 / NetAllTriads,
 			PermSigTriDisrib(TriClassKey).Val2, PermSigTriDisrib(TriClassKey).Val2 / PermAllTriads,
@@ -901,7 +1021,7 @@ int TCtmsNet::CalcNetTriadsDistrib(TTriadEqClasH& NetSigTriDistrib, PCtmsNet& Ne
 		TSnap::GetCmnNbrs(Net, EI.GetSrcNId(), EI.GetDstNId(), NbrV);
 		for (int n = 0; n < NbrV.Len(); n++) {
 			PCtmsNet Tri = Net->GetTriad(EI.GetSrcNId(), EI.GetDstNId(), NbrV[n]);
-			NetSigTriDistrib(Tri->GetTriadStr(true)).Val2 += 1;
+			NetSigTriDistrib(Tri->GetTriadStr()).Val2 += 1;
 		}
 		if (++c % Decile == 0) { printf("."); }
 	}

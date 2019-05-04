@@ -548,106 +548,6 @@ void TSignPredictionLearn::SavePredictions(const TStr& Suffx) {
 //////////////////////////////////////////////////////////////////////
 //TSignPredicNoLrn
 
-int TSignPredicNoLrn::EdgeSig(int e1, int e2) {
-	if (e1==0 && e2==0) { return 0; }
-	if (e1==1 && e2==0) { return 1; }
-	if (e1==-1 && e2==0) { return 2; }
-	if (e1==0 && e2==1) { return 3; }
-	if (e1==0 && e2==-1) { return 4; }
-	if (e1==1 && e2==1) { return 5; }
-	if (e1==1 && e2==-1) { return 6; }
-	if (e1==-1 && e2==1) { return 7; }
-	if (e1==-1 && e2==-1) { return 8; }
-	Fail; return -1;
-}
-
-TChA TSignPredicNoLrn::GetTriadStr(int a[2], int b[2], int c[2]) {
-	const int e1 = EdgeSig(a[0], a[1]);
-	const int e2 = EdgeSig(b[0], b[1]);
-	const int e3 = EdgeSig(c[0], c[1]);
-	const TIntTr MnTr1 = TMath::Mn(TIntTr(e1, e2, e3), TIntTr(e2, e3, e1), TIntTr(e3, e1, e2));
-	const int e1a = EdgeSig(c[1], c[0]);
-	const int e2a = EdgeSig(b[1], b[0]);
-	const int e3a = EdgeSig(a[1], a[0]);
-	const TIntTr MinTr = TMath::Mn(MnTr1, TMath::Mn(TIntTr(e1a, e2a, e3a), TIntTr(e2a, e3a, e1a), TIntTr(e3a, e1a, e2a)));
-
-	const TInt EdgNum[] = {MinTr.Val1, MinTr.Val2, MinTr.Val3};
-	TChA EdgStr[3];
-	for (int i = 0; i < 3; i++) {
-		switch(EdgNum[i]) {
-		case 1 : EdgStr[i] = "+o"; break;
-		case 2 : EdgStr[i] = "-o"; break;
-		case 3 : EdgStr[i] = "o+"; break;
-		case 4 : EdgStr[i] = "o-"; break;
-		case 5 : EdgStr[i] = "++"; break;
-		case 6 : EdgStr[i] = "+-"; break;
-		case 7 : EdgStr[i] = "-+"; break;
-		case 8 : EdgStr[i] = "--"; break;
-		default : EdgStr[i] = TChA();
-		}
-	}
-	return EdgStr[0]+"|"+EdgStr[1]+"|"+EdgStr[2];
-}
-
-TChA TSignPredicNoLrn::GetTriadStr(const PCtmsNet& Nt, int srcId, int dstId, int nbrId, bool IsSigned) {
-	int SDSgn[2] = {0, 0}, DNSgn[2] = {0, 0}, NSSgn[2] = {0, 0};
-	if (IsSigned) {
-		if (Nt->IsEdge(srcId, dstId)) {
-			SDSgn[0] = Nt->GetEDat(srcId, dstId);}
-		if (Nt->IsEdge(dstId, srcId)) {
-			SDSgn[1] = Nt->GetEDat(dstId, srcId);}
-		if (Nt->IsEdge(dstId, nbrId)) {
-			DNSgn[0] = Nt->GetEDat(dstId, nbrId);}
-		if (Nt->IsEdge(nbrId, dstId)) {
-			DNSgn[1] = Nt->GetEDat(nbrId, dstId);}
-		if (Nt->IsEdge(nbrId, srcId)) {
-			NSSgn[0] = Nt->GetEDat(nbrId, srcId);}
-		if (Nt->IsEdge(srcId, nbrId)) {
-			NSSgn[1] = Nt->GetEDat(srcId, nbrId);}
-	}
-	else {
-		if (Nt->IsEdge(srcId, dstId)) {
-			SDSgn[0] = 1;}
-		if (Nt->IsEdge(dstId, srcId)) {
-			SDSgn[1] = 1;}
-		if (Nt->IsEdge(dstId, nbrId)) {
-			DNSgn[0] = 1;}
-		if (Nt->IsEdge(nbrId, dstId)) {
-			DNSgn[1] = 1;}
-		if (Nt->IsEdge(nbrId, srcId)) {
-			NSSgn[0] = 1;}
-		if (Nt->IsEdge(srcId, nbrId)) {
-			NSSgn[1] = 1;}
-	}
-	//return GetTriadStr(SDSgn, DNSgn, NSSgn);
-	int *a = SDSgn, *b = DNSgn, *c = NSSgn;
-	const int e1 = EdgeSig(a[0], a[1]);
-	const int e2 = EdgeSig(b[0], b[1]);
-	const int e3 = EdgeSig(c[0], c[1]);
-	const TIntTr MnTr1 = TMath::Mn(TIntTr(e1, e2, e3), TIntTr(e2, e3, e1), TIntTr(e3, e1, e2));
-	const int e1a = EdgeSig(c[1], c[0]);
-	const int e2a = EdgeSig(b[1], b[0]);
-	const int e3a = EdgeSig(a[1], a[0]);
-	const TIntTr MinTr = TMath::Mn(MnTr1, TMath::Mn(TIntTr(e1a, e2a, e3a), TIntTr(e2a, e3a, e1a), TIntTr(e3a, e1a, e2a)));
-	//return TCtmsNet::GetTriadStr(MinTr);
-	const TInt EdgNum[] = {MinTr.Val1, MinTr.Val2, MinTr.Val3};
-	TChA EdgStr[3];
-	for (int i = 0; i < 3; i++) {
-		switch(EdgNum[i]) {
-		case 1 : EdgStr[i] = "+o"; break;
-		case 2 : EdgStr[i] = "-o"; break;
-		case 3 : EdgStr[i] = "o+"; break;
-		case 4 : EdgStr[i] = "o-"; break;
-		case 5 : EdgStr[i] = "++"; break;
-		case 6 : EdgStr[i] = "+-"; break;
-		case 7 : EdgStr[i] = "-+"; break;
-		case 8 : EdgStr[i] = "--"; break;
-		default : EdgStr[i] = TChA();
-		}
-	}
-	return EdgStr[0]+"|"+EdgStr[1]+"|"+EdgStr[2];
-}
-
 double TSignPredicNoLrn::CalcEffectiveEsPosProb(const PCtmsNet& Nt) {
 	int baseNetNONZeroEmbEs = 0;
 	int posE = 0;
@@ -908,11 +808,11 @@ void TSignPredicNoLrn::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt>& thta, TS
 			if (EI() == 1) {emptyFeVPosEs++;}
 		}
 		for (int n = 0; n < NbrV.Len(); n++) {
-			const TChA TriStr = GetTriadStr(Net, EI.GetSrcNId(), EI.GetDstNId(), NbrV[n]);
+			const TChA TriStr = TCtmsNet::GetTriadStr(Net, EI.GetSrcNId(), EI.GetDstNId(), NbrV[n]);
 			// count signed triad
 			SgnTriCnt(TriStr).Val2 += 1;
 			// count unsigned triads
-			const TChA TriStrUnsgn = GetTriadStr(Net, EI.GetSrcNId(), EI.GetDstNId(), NbrV[n], false);
+			const TChA TriStrUnsgn = TCtmsNet::GetTriadStr(Net, EI.GetSrcNId(), EI.GetDstNId(), NbrV[n], false);
 			UnsgnTriCnt(TriStrUnsgn).Val2 +=1;
 		}
 		if (EI() == 1) { AllPlusE += 1; }
@@ -935,7 +835,7 @@ void TSignPredicNoLrn::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt>& thta, TS
 		//PCtmsNet TriadNetUnsig = SgnTriCnt[t].Val1->CopyNet(); TriadNetUnsig->SetAllEDat(1);
 		TIntV TriNdV;
 		SgnTriCnt[t].Val1->GetNIdV(TriNdV);
-		const TChA Sgn2UnTriStr = GetTriadStr(SgnTriCnt[t].Val1, TriNdV[0], TriNdV[1], TriNdV[2], false);
+		const TChA Sgn2UnTriStr = TCtmsNet::GetTriadStr(SgnTriCnt[t].Val1, TriNdV[0], TriNdV[1], TriNdV[2], false);
 		const double TriadCnt = SgnTriCnt[t].Val2;
 		const double UnSignCnt = 1 + UnsgnTriCnt(Sgn2UnTriStr).Val2; //optional 1 added
 		const double TriadProbInEqCls = SgnTriCnt[t].Val1->GetTriadProb2(PlusProb);
@@ -975,18 +875,18 @@ void TSignPredicNoLrn::ExtractDataSet() {
 		TSnap::GetCmnNbrs(bNet, CurE.Val1, CurE.Val2, NbrsV);
 		for (int n = 0; n < NbrsV.Len(); n++) {
 			PCtmsNet ctms = bNet->GetTriad(CurE.Val1, CurE.Val2, NbrsV[n]); //E(CurE.Val1, CurE.Val2) --> E(0,1)
-			const TChA TriStr = GetTriadStr(ctms, 0, 1, 2);
+			const TChA TriStr = TCtmsNet::GetTriadStr(ctms, 0, 1, 2);
 			TChA PTriStr, NTriStr;
 			if (CurE.Val3 == 1) {
 				PTriStr = TriStr;
 				ctms->SetEDat(0, 1, -1); //Make edge sign negative
-				NTriStr = GetTriadStr(ctms, 0, 1, 2);
+				NTriStr = TCtmsNet::GetTriadStr(ctms, 0, 1, 2);
 			}
 			else //CurE.Val3 == -1
 			{
 				NTriStr = TriStr;
 				ctms->SetEDat(0, 1, 1); //Make edge sign positive
-				PTriStr = GetTriadStr(ctms, 0, 1, 2);
+				PTriStr = TCtmsNet::GetTriadStr(ctms, 0, 1, 2);
 			}
 
 			FeVals.IsKey(Features.GetKeyId(TriStr)) ? FeVals(Features.GetKeyId(TriStr))++ : FeVals.AddDat(Features.GetKeyId(TriStr), 1);

@@ -65,6 +65,10 @@ public:
 	void CompareNetWith(const PCtmsNet& PNet2) const;
 	TVec<TIntTr> GetEmbDistrb() const;
 	bool IsSameTriad2(const PCtmsNet& Net1, const PCtmsNet& Net2);
+	static int EdgeSig(int FwSgn, int BwSgn);
+	static TChA GetTriadStr(int a[2], int b[2], int c[2]);
+	static TChA GetTriadStr(const PCtmsNet& Nt, int srcId, int dstId, int nbrId, bool IsSigned = true);
+	TChA GetTriadStr() const;
 	void static GenTriadEquivClasses(TTriadEqClasH& TriadGroups, const bool BiDirEdgeSide = true, const bool Signed = true, const bool ZeroEdgeSide = false);
 	double GetTriadProb2(const double& PlusProb) const;
 	void CountSignedTriads2(const TStr& OutFNm) const;
