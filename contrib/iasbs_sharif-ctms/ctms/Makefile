@@ -1,6 +1,6 @@
-SNAPDIR=../../../snap
+SNAPDIR=../../../../snap
 INCLUDES= -I $(SNAPDIR)/snap-core -I $(SNAPDIR)/glib-core -I $(SNAPDIR)/snap-adv -I $(SNAPDIR)/snap-exp
-CC=g++
+CC=g++ -std=c++11
 CFLAGS=-c -O3 
 
 SOURCES= ctmsmain.cpp sign_prediction.cpp ml.cpp ctmsnet.cpp convert_wikipedia.cpp
