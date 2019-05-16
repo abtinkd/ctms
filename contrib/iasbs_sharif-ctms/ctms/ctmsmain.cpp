@@ -195,9 +195,10 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 	if(algorithmsEnabled == 4 || algorithmsEnabled == 0 || algorithmsEnabled == 6) {//run Heuristic Balance method
 		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: Heuristic Balance\n" << endl;
-		TEdgeSignPred heuristicPredition;
-		for (TSignNet::TEdgeI EI = Network->BegEI(); EI < Network->EndEI(); EI++) { 
-			heuristicPredition.AddEdge(EI.GetSrcNId(), EI.GetDstNId(), EI.GetDat()); }
+		TEdgeSignPred heuristicPredition;		
+		heuristicPredition.Network = &*Network;
+		/*for (TSignNet::TEdgeI EI = Network->BegEI(); EI < Network->EndEI(); EI++) { 
+			heuristicPredition.AddEdge(EI.GetSrcNId(), EI.GetDstNId(), EI.GetDat()); }*/
 		for (int i = 0; i < Edges.Len(); i++)
 			heuristicPredition.PredictBalance(Edges[i].Val1, Edges[i].Val2, Edges[i].Val3);
 
@@ -219,9 +220,10 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: Heuristic Status\n" << endl;
 		TEdgeSignPred heuristicPredition;
-		for (TSignNet::TEdgeI EI = Network->BegEI(); EI < Network->EndEI(); EI++) {
+		heuristicPredition.Network = &*Network;
+		/*for (TSignNet::TEdgeI EI = Network->BegEI(); EI < Network->EndEI(); EI++) {
 			heuristicPredition.AddEdge(EI.GetSrcNId(), EI.GetDstNId(), EI.GetDat());
-		}
+		}*/
 		for (int i = 0; i < Edges.Len(); i++)
 			heuristicPredition.PredictStatus(Edges[i].Val1, Edges[i].Val2, Edges[i].Val3);
 
