@@ -1021,7 +1021,7 @@ void TSignPredicNoLrn::SaveYXV() {
 	for (int d = 0; d < PXV.Len(); d++) {
 		fprintf(S,"\n(%d, %d)\t%d\t", focusedNetEdges[d].Val1, focusedNetEdges[d].Val2, focusedNetEdges[d].Val3);
 		for (int f = 0; f < Features.Len(); f++) {
-			const int feVal = (PXV[d].IsKey(f) ? PXV[d](f) : 0);
+			const int feVal = (PXV[d].IsKey(f) ? PXV[d](f) : TInt(0));
 			fprintf(S, "%d\t", feVal);
 		}
 	}
@@ -1029,7 +1029,7 @@ void TSignPredicNoLrn::SaveYXV() {
 	for (int d = 0; d < NXV.Len(); d++) {
 		fprintf(L,"\n(%d, %d)\t%d\t", focusedNetEdges[d].Val1, focusedNetEdges[d].Val2, focusedNetEdges[d].Val3);
 		for (int f = 0; f < Features.Len(); f++) {
-			const int feVal = (NXV[d].IsKey(f) ? NXV[d](f) : 0);
+			const int feVal = (NXV[d].IsKey(f) ? NXV[d](f) : TInt(0));
 			fprintf(L, "%d\t", feVal);
 		}
 	}
@@ -1046,7 +1046,7 @@ void TSignPredicNoLrn::SaveDataset() {
 		fprintf(S,"\n");
 		fprintf(S, "(%d, %d)\t%d\t", DataSet.GetKey(d).Val1, DataSet.GetKey(d).Val2, DataSet.GetKey(d).Val3);
 		for (int f = 0; f < Features.Len(); f++) {
-			const int feVal = (DataSet[d].IsKey(f) ? DataSet[d](f) : 0);
+			const int feVal = (DataSet[d].IsKey(f) ? DataSet[d](f) : TInt(0));
 			fprintf(S, "%d\t", feVal);
 		}
 	}

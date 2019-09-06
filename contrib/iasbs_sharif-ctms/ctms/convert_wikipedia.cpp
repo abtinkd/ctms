@@ -11,7 +11,7 @@ int convertWiki(char fileLoc[], bool includeNeutralVotes)
 {
 	ifstream fin(fileLoc);
 	ofstream fout;
-	char* outFileLoc = (includeNeutralVotes ? "wikipedia_NeutralIncluded.txt" : "wikipedia.txt");
+	const char* outFileLoc = (includeNeutralVotes ? "wikipedia_NeutralIncluded.txt" : "wikipedia.txt");
 	fout.open(outFileLoc);
 	if (!fin.is_open()) {cout << "ERROR Read"; return 1;}
 	if (!fout.is_open()) {cout << "ERROR Write"; return 1;}
