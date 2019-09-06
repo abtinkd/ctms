@@ -51,8 +51,8 @@ public:
 	PCtmsNet GetMinEmbeddedSubNet(const int MinEmValue);
 	bool operator==(const TCtmsNet& SgnNet) const;
 	bool operator!=(const TCtmsNet& SgnNet) const;	
-	PCtmsNet GenRewire(const int& NSwitch, TRnd& Rnd = TRnd()) const;
-	PCtmsNet GenRewire2Hash(const int& NSwitch, TRnd& Rnd = TRnd()) const;
+	PCtmsNet GenRewire(const int& NSwitch, TRnd Rnd = TRnd()) const;
+	PCtmsNet GenRewire2Hash(const int& NSwitch, TRnd Rnd = TRnd()) const;
 	PCtmsNet RewireNetwork2(const int &NSwitch = 0, const bool separateHash = true);
 	PCtmsNet RewireNetwork(const int &NSwitch);
 	PCtmsNet PermuteEdgeSigns2();

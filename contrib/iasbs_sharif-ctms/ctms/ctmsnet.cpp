@@ -122,7 +122,7 @@ PCtmsNet TCtmsNet::LoadSignedNet(const TStr& InFNm, const int& SrcColId, const i
 }
 
 //Overloading of SNAP native GenRewire of PNGraph for TSignNet
-PCtmsNet TCtmsNet::GenRewire(const int& NSwitch, TRnd& Rnd) const {
+PCtmsNet TCtmsNet::GenRewire(const int& NSwitch, TRnd Rnd) const {
 	const int Nodes = GetNodes();
 	const int Edges = GetEdges();
 	PCtmsNet NetPt = TCtmsNet::New();
@@ -239,7 +239,7 @@ void SwitchEdges(TIntTrSet& EdgeSet, TIntTrSet& EdgeSetOther, const int& NSwitch
 	printf("\n  %uk / %uk was Successful.\n  %uk Skiped.\n  %uk was already in Hash\n  Total Time [%s]\n",
 		succsSwps / 1000u, 2 * uint(EdgeSet.Len())*uint(NSwitch) / 1000u, skip / 1000u, skip3 / 1000u, ExeTm.GetStr());
 }
-PCtmsNet TCtmsNet::GenRewire2Hash(const int& NSwitch, TRnd& Rnd) const {
+PCtmsNet TCtmsNet::GenRewire2Hash(const int& NSwitch, TRnd Rnd) const {
 	const int Nodes = GetNodes();
 	const int Edges = GetEdges();
 	PCtmsNet NetPt = TCtmsNet::New();
@@ -705,7 +705,7 @@ TChA TCtmsNet::GetTriadStr(int a[2], int b[2], int c[2]) {
 		default: EdgStr[i] = TChA();
 		}
 	}
-	return EdgStr[0] + "|" + EdgStr[1] + "|" + EdgStr[2];
+	return EdgStr[0] += TChA("|") += EdgStr[1] += TChA("|") += EdgStr[2];
 }
 
 TChA TCtmsNet::GetTriadStr(const PCtmsNet& Nt, int srcId, int dstId, int nbrId, bool IsSigned) {
@@ -776,7 +776,7 @@ TChA TCtmsNet::GetTriadStr(const PCtmsNet& Nt, int srcId, int dstId, int nbrId, 
 		default: EdgStr[i] = TChA();
 		}
 	}
-	return EdgStr[0] + "|" + EdgStr[1] + "|" + EdgStr[2];
+	return EdgStr[0] += TChA("|") += EdgStr[1] += TChA("|") += EdgStr[2];
 }
 
 TChA TCtmsNet::GetTriadStr() const {
