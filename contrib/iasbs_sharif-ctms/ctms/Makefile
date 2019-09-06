@@ -1,22 +1,11 @@
-SNAPDIR=../../../../snap
-INCLUDES= -I $(SNAPDIR)/snap-core -I $(SNAPDIR)/glib-core -I $(SNAPDIR)/snap-adv -I $(SNAPDIR)/snap-exp
-CC=g++ -std=c++11
-CFLAGS=-c -O3 
+#
+#	Makefile for this SNAP example
+#	- modify Makefile.ex when creating a new SNAP example
+#
+#	implements:
+#		all (default), clean
+#
 
-SOURCES= ctmsmain.cpp sign_prediction.cpp ml.cpp ctmsnet.cpp convert_wikipedia.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=ctmsmain
-SNAPLIB=$(SNAPDIR)/snap-core/Snap.o
-
-all:	$(SNAPLIB) $(SOURCES) $(EXECUTABLE)
-
-$(SNAPLIB):	
-	$(MAKE) -C $(SNAPDIR)
-	
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(SNAPLIB)
-
-.cpp.o:
-	$(CC) $(CFLAGS) $< $(INCLUDES) -o $@
-clean:
-	rm -f $(EXECUTABLE) *.o
+include ../../../Makefile.config
+include Makefile.ex
+include ../Makefile.exmain
