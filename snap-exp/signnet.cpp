@@ -465,7 +465,7 @@ TChA TSignNet::GetEdgeStr(const int& EdgeSig) {
 }
 
 TChA TSignNet::GetTriadStr(const TIntTr& TriadSig) {
-  return GetEdgeStr(TriadSig.Val1)+"\t"+GetEdgeStr(TriadSig.Val2)+"\t"+GetEdgeStr(TriadSig.Val3);
+  return GetEdgeStr(TriadSig.Val1)+=TChA("\t")+=GetEdgeStr(TriadSig.Val2)+=TChA("\t")+=GetEdgeStr(TriadSig.Val3);
 }
 
 /*// Sig1 is a 3 node closed triad, Sig2 is Sig1 with additional edge, what is the closed edge
@@ -609,7 +609,7 @@ void TSignNet::CountSignedTriads(const TStr& OutFNm) const {
     const double Surp = (TriadCnt-ExpCnt) / sqrt(UnSignCnt*TriadProb*(1.0-TriadProb));
     fprintf(F, "  label = \"T=%d, E[T]=%d, S=%.1f\";\n}\n", int(TriadCnt), int(ExpCnt), Surp);
     fclose(F);
-    TGraphViz::DoLayout(FNm+".dot", FNm+".gif",  gvlNeato);
+    //TGraphViz::DoLayout(FNm+".dot", FNm+".gif",  gvlNeato);
     fprintf(T, "%s\t%d\t%d\t%.2f\t%f\n", TriadNet->GetTriadStr(true).CStr(), int(TriadCnt), int(ExpCnt), Surp, TriadProb);
   }
   fclose(T);
@@ -773,7 +773,7 @@ void TSignNet::DrawGraphViz(const TStr& OutFNm, const TStr& Desc, const bool& No
   fprintf(F, "  fontsize=24;\n");
   fprintf(F, "}\n");
   fclose(F);
-  TGraphViz::DoLayout(OutFNm+".dot", OutFNm+".gif",  gvlNeato);
+  //TGraphViz::DoLayout(OutFNm+".dot", OutFNm+".gif",  gvlNeato);
 }
 
 void TSignNet::PrintInfo(const TStr& Desc) const {
