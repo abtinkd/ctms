@@ -7,7 +7,7 @@ PCtmsNet TCtmsNet::CopyNet() const {
 	PCtmsNet Net = TCtmsNet::New();
 	for (TSignNet::TNodeI NI = BegNI(); NI < EndNI(); NI++) { Net->AddNode(NI); }
 	for (TSignNet::TEdgeI EI = BegEI(); EI < EndEI(); EI++) { Net->AddEdge(EI); }
-	if (*Net == TSignNet(*this)) { return Net; }
+	if (*Net == TCtmsNet(*this)) { return Net; }
 	return NULL;
 }
 
