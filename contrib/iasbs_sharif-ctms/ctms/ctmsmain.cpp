@@ -169,7 +169,7 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 	if(algorithmsEnabled == 1 || algorithmsEnabled == 0) {//naive method
 		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: Naive method\n" << endl;
-		TSignPredictionNaive naive(Network, outputFNm + "Naive.", Edges);
+		TNaiveInference naive(Network, outputFNm + "Naive.", Edges);
 		naive.GetOutDegBasedAcc();
 		naive.GetInDegBasedAcc();
 		naive.GetweightedMeanBasedAcc();
@@ -180,7 +180,7 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 	if(algorithmsEnabled == 2 || algorithmsEnabled == 0) {//run Abtin's method
 		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: Abt method (No learning; 96 triad classes)\n" << endl;
-		TSignPredicNoLrn NoLearn(Network, outputFNm + "Abt.", Edges);
+		TCTMSProbabilisticInference NoLearn(Network, outputFNm + "Abt.", Edges);
 		NoLearn.CrossValidTest(SbNet);
 
 	}
@@ -188,7 +188,7 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 	if(algorithmsEnabled == 3 || algorithmsEnabled == 0) {//run Lescoves's method
 		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: Les method (16 triad logistic regression)\n" << endl;
-		TSignPredictionLearn Learn(Network, outputFNm + "Les.", Edges);
+		TLogisticRegression Learn(Network, outputFNm + "Les.", Edges);
 		Learn.CrossValidTest();
 	}
 
@@ -381,7 +381,7 @@ void TestAnalysis() {
 	LoadSNet(testNet, FileNTest);
 	PrintNStats("Test", testNet);
 	balancedNet = testNet->GetBalSgnProbSubNet();
-	TSignPredictionLearn Tpredictor(balancedNet, "BalTestSgn");
+	TLogisticRegression Tpredictor(balancedNet, "BalTestSgn");
 	Tpredictor.FeatureSelection(3);
 	Tpredictor.SaveDataset("F");
 	Tpredictor.SaveYXV("F");
@@ -444,10 +444,10 @@ void CrossNetPredictionNOLrn(const char NN, const int MinEm = 1, const bool Bl =
 		GetPridictionEdges(wikipedia, WiSelecEdgs, MinEm, Bl);
 	GetPridictionEdges(testNet, TsSelecEdgs, MinEm, Bl);
 
-	static TSignPredicNoLrn EpSPL(epinions, EpName.CStr(), EpSelecEdgs),
+	static TCTMSProbabilisticInference EpSPL(epinions, EpName.CStr(), EpSelecEdgs),
 		SlSPL(slashdot, SlName, SlSelecEdgs),
 		WiSPL(wikipedia, WiName, WiSelecEdgs);
-	TSignPredicNoLrn TstSPL(testNet, TstName, TsSelecEdgs);
+	TCTMSProbabilisticInference TstSPL(testNet, TstName, TsSelecEdgs);
 	IAssert(!epinions.Empty()); IAssert(!slashdot.Empty()); IAssert(!wikipedia.Empty());
 	THash<TChA, TFlt> theTa;
 	switch (NN)
@@ -457,7 +457,7 @@ void CrossNetPredictionNOLrn(const char NN, const int MinEm = 1, const bool Bl =
 		if (useNewAlg)
 			EpSPL.GetTheta(theTa);
 		else
-			TSignPredicNoLrn::GetTheta(GetNet(EpSelecEdgs), theTa, "EpinionsSubNet");
+			TCTMSProbabilisticInference::GetTheta(GetNet(EpSelecEdgs), theTa, "EpinionsSubNet");
 		cout << "DONE" << endl;
 		cout << "Accuracy on Epinions: " <<	EpSPL.Test(theTa).accuracy << endl;
 		cout << "Accuracy on Slashdot: " << SlSPL.Test(theTa).accuracy << endl;
@@ -468,7 +468,7 @@ void CrossNetPredictionNOLrn(const char NN, const int MinEm = 1, const bool Bl =
 		if (useNewAlg)
 			SlSPL.GetTheta(theTa);
 		else
-			TSignPredicNoLrn::GetTheta(GetNet(SlSelecEdgs), theTa, "SlashdotSubNet");
+			TCTMSProbabilisticInference::GetTheta(GetNet(SlSelecEdgs), theTa, "SlashdotSubNet");
 		cout << "DONE" << endl;
 		cout << "Accuracy on Epinions: " <<	EpSPL.Test(theTa).accuracy << endl;
 		cout << "Accuracy on Slashdot: " << SlSPL.Test(theTa).accuracy << endl;
@@ -479,7 +479,7 @@ void CrossNetPredictionNOLrn(const char NN, const int MinEm = 1, const bool Bl =
 		if (useNewAlg)
 			WiSPL.GetTheta(theTa);
 		else
-			TSignPredicNoLrn::GetTheta(GetNet(WiSelecEdgs), theTa, "WikipediaSubNet");
+			TCTMSProbabilisticInference::GetTheta(GetNet(WiSelecEdgs), theTa, "WikipediaSubNet");
 		cout << "DONE" << endl;
 		cout << "Accuracy on Epinions: " <<	EpSPL.Test(theTa).accuracy << endl;
 		cout << "Accuracy on Slashdot: " << SlSPL.Test(theTa).accuracy << endl;
@@ -490,7 +490,7 @@ void CrossNetPredictionNOLrn(const char NN, const int MinEm = 1, const bool Bl =
 		if (useNewAlg)
 			TstSPL.GetTheta(theTa);
 		else
-			TSignPredicNoLrn::GetTheta(GetNet(TsSelecEdgs), theTa, "TestnetSubNet");
+			TCTMSProbabilisticInference::GetTheta(GetNet(TsSelecEdgs), theTa, "TestnetSubNet");
 		cout << "DONE" << endl;
 		cout << "Accuracy on Epinions: " <<	EpSPL.Test(theTa).accuracy << endl;
 		cout << "Accuracy on Slashdot: " << SlSPL.Test(theTa).accuracy << endl;
@@ -526,10 +526,10 @@ void CrossNetPredictionLearn(const char NN, const int MinEm = 1, const bool Bl =
 		GetPridictionEdges(wikipedia, WiSelecEdgs, MinEm, Bl);
 	GetPridictionEdges(testNet, TsSelecEdgs, MinEm, Bl);
 
-	static TSignPredictionLearn EpSPL(epinions, EpName.CStr(), EpSelecEdgs),
+	static TLogisticRegression EpSPL(epinions, EpName.CStr(), EpSelecEdgs),
 		SlSPL(slashdot, SlName, SlSelecEdgs),
 		WiSPL(wikipedia, WiName, WiSelecEdgs);
-	TSignPredictionLearn TstSPL(testNet, TstName, TsSelecEdgs);
+	TLogisticRegression TstSPL(testNet, TstName, TsSelecEdgs);
 	IAssert(!epinions.Empty()); IAssert(!slashdot.Empty()); IAssert(!wikipedia.Empty());
 	TFltV theTa;
 	switch (NN)

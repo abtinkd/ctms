@@ -135,8 +135,8 @@ PCtmsNet TCrossValidation::GetNet(const TIntV& Indexes) {
 	return net;
 }
 //////////////////////////////////////////////////////////////////////
-//TSignPredictionNaive
-void TSignPredictionNaive::CalcProbs() {
+//TNaiveInference
+void TNaiveInference::CalcProbs() {
 	for (int v = 0; v < focusedNetEdges.Len(); v++) {
 		const TIntTr Edge = focusedNetEdges[v];
 		int SrcPosOutDeg = 0, DesPosInDeg = 0;
@@ -184,7 +184,7 @@ void TSignPredictionNaive::CalcProbs() {
 }
 
 //////////////////////////////////////////////////////////////////////
-//TSignPredictionLearn
+//TLogisticRegression
 
 /*
 Describtion:
@@ -196,7 +196,7 @@ Then we assure that that triad can happen in the features:
 1. If the triad is complete (6 edges), it is not a feature, since we can't have a 6-edge triad feature after removing one
 2. {A,N} and {B,N} must be present since we look for features in the (A,B)'s neighbourhood.
 */
-void TSignPredictionLearn::CreateFeatureV(const bool Signed, const bool BiDirEdgeSide) {
+void TLogisticRegression::CreateFeatureV(const bool Signed, const bool BiDirEdgeSide) {
 	TTriadEqClasH fe;
 	TCtmsNet::GenTriadEquivClasses(fe, BiDirEdgeSide, Signed, true);
 	for (int c = 0;  c < fe.Len(); c++) {
@@ -212,7 +212,7 @@ void TSignPredictionLearn::CreateFeatureV(const bool Signed, const bool BiDirEdg
 	return;
 }
 
-void TSignPredictionLearn::CreateFeatureVPp() {
+void TLogisticRegression::CreateFeatureVPp() {
 	const TStr ES[] = {"F", "B"}, SS[] = {"p", "n"};
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < 2; j++) {
@@ -226,7 +226,7 @@ void TSignPredictionLearn::CreateFeatureVPp() {
 	return;
 }
 
-void TSignPredictionLearn::FeatureSelection(const int FeCnt) {
+void TLogisticRegression::FeatureSelection(const int FeCnt) {
 	if (FeCnt < 1 || FeCnt >= Features.Len()) {return;}
 	THash<TChA, TFlt> FeaturesCnt;
 	for (int l = 0;  l < Features.Len(); l++) {FeaturesCnt.AddDat(Features.GetKey(l), 0);}
@@ -259,7 +259,7 @@ void TSignPredictionLearn::FeatureSelection(const int FeCnt) {
 	return;
 }
 
-void TSignPredictionLearn::CalcTheta(TFltV& th, bool saveTheta) {
+void TLogisticRegression::CalcTheta(TFltV& th, bool saveTheta) {
 	if (LRModel.Empty())
 		FitPredictionModel(false, true);
 	LRModel->GetTheta(th);
@@ -268,7 +268,7 @@ void TSignPredictionLearn::CalcTheta(TFltV& th, bool saveTheta) {
 	return;
 }
 
-void TSignPredictionLearn::ExtractDataSet(const bool Signed, const bool BiDirEdgeSide) {
+void TLogisticRegression::ExtractDataSet(const bool Signed, const bool BiDirEdgeSide) {
 	TIntV NbrsV;
 	PCtmsNet SgnNet = bNet->CopyNet();
 
@@ -319,7 +319,7 @@ void TSignPredictionLearn::ExtractDataSet(const bool Signed, const bool BiDirEdg
 	return;
 }
 
-void TSignPredictionLearn::ExtractDataSetPp() {
+void TLogisticRegression::ExtractDataSetPp() {
 	TExeTm Tm;
 	TIntV NbrsV;
 
@@ -381,7 +381,7 @@ void TSignPredictionLearn::ExtractDataSetPp() {
 	return;
 }
 
-void TSignPredictionLearn::ScaleFeature() {
+void TLogisticRegression::ScaleFeature() {
 	printf("Scaling feature Vector\n");
 	TFltV MaxVal(Features.Len());
 	MaxVal.PutAll(1);
@@ -399,7 +399,7 @@ void TSignPredictionLearn::ScaleFeature() {
 	return;
 }
 
-void TSignPredictionLearn::FitPredictionModel(const bool ScaleF, const bool Newton) {
+void TLogisticRegression::FitPredictionModel(const bool ScaleF, const bool Newton) {
 	printf("Fitting Prediction Model...");
 	if (ScaleF) {ScaleFeature();}
 	TLogRegFit LRFit;
@@ -409,7 +409,7 @@ void TSignPredictionLearn::FitPredictionModel(const bool ScaleF, const bool Newt
 	return;
 }
 
-TPredictionResult TSignPredictionLearn::Test(const PLogRegPredict& LogRegM, const TVec<TFltV>& X, const TFltV& Y, TFltV& outCfys) {
+TPredictionResult TLogisticRegression::Test(const PLogRegPredict& LogRegM, const TVec<TFltV>& X, const TFltV& Y, TFltV& outCfys) {
 	IAssertR(X.Len() == Y.Len(), "X and Y mismatch");
 	TIntV YIntV(Y.Len());
 	for (int i = 0; i < Y.Len(); i++)
@@ -429,7 +429,7 @@ TPredictionResult TSignPredictionLearn::Test(const PLogRegPredict& LogRegM, cons
 	return getAccuracy(YIntV, Results, valueWhenZeroFeatV);
 }
 
-TPredictionResult TSignPredictionLearn::Test(const TFltV& theta, const TVec<TFltV>& X, const TFltV& Y) {
+TPredictionResult TLogisticRegression::Test(const TFltV& theta, const TVec<TFltV>& X, const TFltV& Y) {
 	IAssertR(X.Len() == Y.Len(), "X and Y mismatch");
 	const int feaSize = X[0].Len();
 	IAssertR(theta.Len() == feaSize || theta.Len() == (feaSize+1), "Theta mismatch");
@@ -449,17 +449,17 @@ TPredictionResult TSignPredictionLearn::Test(const TFltV& theta, const TVec<TFlt
 	return getAccuracy(YIntV, Results, valueWhenZeroFeatV);
 }
 
-const TPredictionResult TSignPredictionLearn::Test(const PLogRegPredict& LogRegM) {
+const TPredictionResult TLogisticRegression::Test(const PLogRegPredict& LogRegM) {
 	IAssert(!LogRegM.Empty());
-	return TSignPredictionLearn::Test(LogRegM, XV, YV, Pred);
+	return TLogisticRegression::Test(LogRegM, XV, YV, Pred);
 }
 
-const TPredictionResult TSignPredictionLearn::Test(const TFltV& theta) const {
+const TPredictionResult TLogisticRegression::Test(const TFltV& theta) const {
 	IAssert(!theta.Empty());
-	return TSignPredictionLearn::Test(theta, XV, YV);
+	return TLogisticRegression::Test(theta, XV, YV);
 }
 
-double TSignPredictionLearn::CrossValidTest(const bool ScaleF, const bool Newton, const int NFold) {
+double TLogisticRegression::CrossValidTest(const bool ScaleF, const bool Newton, const int NFold) {
 	TExeTm Tm;
 	IAssert(!XV.Empty());
 	IAssert(XV.Len() == YV.Len());
@@ -471,7 +471,7 @@ double TSignPredictionLearn::CrossValidTest(const bool ScaleF, const bool Newton
 	return acc;
 }
 
-TPredictionResult TSignPredictionLearn::TrainTestUseFeaV(TIntV& TrnIndxs, TIntV& TstIndxs) {
+TPredictionResult TLogisticRegression::TrainTestUseFeaV(TIntV& TrnIndxs, TIntV& TstIndxs) {
 	TVec<TFltV> TestXV, TrainXV;
 	TFltV TestYV, TrainYV;
 	for (int i = 0; i < TrnIndxs.Len(); i++) {
@@ -500,11 +500,11 @@ TPredictionResult TSignPredictionLearn::TrainTestUseFeaV(TIntV& TrnIndxs, TIntV&
 	return res;
 }
 
-TPredictionResult TSignPredictionLearn::TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs) {
+TPredictionResult TLogisticRegression::TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs) {
 	return TPredictionResult();
 }
 
-void TSignPredictionLearn::SaveDataset(const TStr& Suffx) {
+void TLogisticRegression::SaveDataset(const TStr& Suffx) {
 	FILE * S = fopen((OutputDir+NetName+"DSet"+Suffx+".data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\t");
 	for (int f = 0; f < Features.Len(); f++) {fprintf(S, "{%s}\t", (Features[f]).CStr());}
@@ -516,7 +516,7 @@ void TSignPredictionLearn::SaveDataset(const TStr& Suffx) {
 	fclose(S);
 }
 
-void TSignPredictionLearn::SaveYXV(const TStr& Suffx) {
+void TLogisticRegression::SaveYXV(const TStr& Suffx) {
 	FILE * S = fopen((OutputDir+NetName+"Y_X"+Suffx+".data").CStr(), "wt");
 	fprintf(S, "#Label\t");
 	for (int f = 0; f < Features.Len(); f++) {fprintf(S, "{%s}\t", (Features[f]).CStr());}
@@ -527,7 +527,7 @@ void TSignPredictionLearn::SaveYXV(const TStr& Suffx) {
 	fclose(S);
 }
 
-void TSignPredictionLearn::SaveTheta(const TStr& Suffx) {
+void TLogisticRegression::SaveTheta(const TStr& Suffx) {
 	FILE * S = fopen((OutputDir+NetName+"Theta"+Suffx+".data").CStr(), "a+t");
 	TFltV thet; LRModel->GetTheta(thet);
 	fprintf(S, "#Theta0\t");
@@ -537,7 +537,7 @@ void TSignPredictionLearn::SaveTheta(const TStr& Suffx) {
 	fclose(S);
 }
 
-void TSignPredictionLearn::SavePredictions(const TStr& Suffx) {
+void TLogisticRegression::SavePredictions(const TStr& Suffx) {
 	FILE * S = fopen((OutputDir+NetName+"Predictions"+Suffx+".data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\tPrediction");
 	for (int p = 0; p < Pred.Len(); p++)
@@ -546,9 +546,9 @@ void TSignPredictionLearn::SavePredictions(const TStr& Suffx) {
 }
 
 //////////////////////////////////////////////////////////////////////
-//TSignPredicNoLrn
+//TCTMSProbabilisticInference
 
-double TSignPredicNoLrn::CalcEffectiveEsPosProb(const PCtmsNet& Nt) {
+double TCTMSProbabilisticInference::CalcEffectiveEsPosProb(const PCtmsNet& Nt) {
 	int baseNetNONZeroEmbEs = 0;
 	int posE = 0;
 	for (TSignNet::TEdgeI EI = Nt->BegEI(); EI < Nt->EndEI(); EI++) { // instead of using TSnap::GetCmnNbrs() to increase performance
@@ -566,7 +566,7 @@ double TSignPredicNoLrn::CalcEffectiveEsPosProb(const PCtmsNet& Nt) {
 	return posE/(double)baseNetNONZeroEmbEs;
 }
 
-TFlt TSignPredicNoLrn::GetEdgeNaivePrediction(const TIntPr& Edge) const{
+TFlt TCTMSProbabilisticInference::GetEdgeNaivePrediction(const TIntPr& Edge) const{
 	int SrcPosOutDeg = 0, DesPosInDeg = 0;
 
 	const TSignNet::TNodeI SrcNI = bNet->GetNI(Edge.Val1);
@@ -597,11 +597,11 @@ TFlt TSignPredicNoLrn::GetEdgeNaivePrediction(const TIntPr& Edge) const{
 	return weightedMeanBased ;
 }
 
-void TSignPredicNoLrn::CreateFeatureV() {
+void TCTMSProbabilisticInference::CreateFeatureV() {
 	GetFeatureV(Features);
 }
 
-void TSignPredicNoLrn::GetFeatureV(THashSet<TChA>& Featu) {
+void TCTMSProbabilisticInference::GetFeatureV(THashSet<TChA>& Featu) {
 	static TTriadEqClasH fe;
 	if (fe.Empty())
 		TCtmsNet::GenTriadEquivClasses(fe);
@@ -611,7 +611,7 @@ void TSignPredicNoLrn::GetFeatureV(THashSet<TChA>& Featu) {
 	return;
 }
 
-void TSignPredicNoLrn::GetTheta(THash<TChA, TFlt>& thta) {
+void TCTMSProbabilisticInference::GetTheta(THash<TChA, TFlt>& thta) {
 	TIntV Idx;
 	if (theta.Empty()) {
 		Idx.Gen(focusedNetEdges.Len());
@@ -642,7 +642,7 @@ TIntPr GetClassPosNegECount(const TChA TriClassStr, const THashSet<TChA>& Feas) 
 	return AllClassesPosNegEs(TriClassStr);
 }
 
-void TSignPredicNoLrn::GetTheta(const TIntV& TrnIndices, THash<TChA, TFlt>& thta) {
+void TCTMSProbabilisticInference::GetTheta(const TIntV& TrnIndices, THash<TChA, TFlt>& thta) {
 	TExeTm Tm;
 	printf("Calculating Theta using new function ...\n");
 	THash<TChA, TInt> actualCTMSsCnt, CTMSsIfPos, CTMSsIfNeg;
@@ -703,7 +703,7 @@ void TSignPredicNoLrn::GetTheta(const TIntV& TrnIndices, THash<TChA, TFlt>& thta
 }
 
 //Similar to previous function but it considers edge embeddedness to calculate p0 and count CTMSs.
-void TSignPredicNoLrn::GetThetaEmBased(const TIntV& TrnIndices, THash<TChA, TFlt>& thta) {
+void TCTMSProbabilisticInference::GetThetaEmBased(const TIntV& TrnIndices, THash<TChA, TFlt>& thta) {
 	TExeTm Tm;
 	printf("Calculating Theta using new function(2) ...\n");
 	THash<TChA, TInt> actualCTMSsCnt, CTMSs;
@@ -780,7 +780,7 @@ void TSignPredicNoLrn::GetThetaEmBased(const TIntV& TrnIndices, THash<TChA, TFlt
 }
 //
 
-void TSignPredicNoLrn::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt>& thta, TStr saveFileName) {
+void TCTMSProbabilisticInference::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt>& thta, TStr saveFileName) {
 	TExeTm Tm;
 	THashSet<TChA> Features;
 	GetFeatureV(Features);
@@ -857,7 +857,7 @@ void TSignPredicNoLrn::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt>& thta, TS
 	return;
 }
 
-void TSignPredicNoLrn::ExtractDataSet() {
+void TCTMSProbabilisticInference::ExtractDataSet() {
 	TExeTm Tm;
 	TIntV NbrsV;
 	printf("Extracting DataSet.. \n");
@@ -907,7 +907,7 @@ void TSignPredicNoLrn::ExtractDataSet() {
 	return;
 }
 
-double TSignPredicNoLrn::GetCfy(const TIntV& IndexV, TFltV& OutV, const THash<TChA, TFlt>& NewTheta) {
+double TCTMSProbabilisticInference::GetCfy(const TIntV& IndexV, TFltV& OutV, const THash<TChA, TFlt>& NewTheta) {
 	for (int i = 0;  i < IndexV.Len(); i++) {
 		double pos = 0, neg = 0;
 		long nonZeros = 0;
@@ -938,7 +938,7 @@ double TSignPredicNoLrn::GetCfy(const TIntV& IndexV, TFltV& OutV, const THash<TC
 }
 
 // Maps theta values to (-0.5, 0.5):	min -> -0.5		 max -> 0.5
-void TSignPredicNoLrn::normalize(THash<TChA, TFlt>& Th) {
+void TCTMSProbabilisticInference::normalize(THash<TChA, TFlt>& Th) {
 	TFlt min = 0, max = 0, median = 0, mean = 0;
 	for (int i = 0; i < Th.Len(); i++) {
 		if (Th[i] < min)
@@ -956,7 +956,7 @@ void TSignPredicNoLrn::normalize(THash<TChA, TFlt>& Th) {
 	return;
 }
 
-TPredictionResult TSignPredicNoLrn::Test(const THash<TChA, TFlt>& Th, const TIntV& TstEsIndexes) {
+TPredictionResult TCTMSProbabilisticInference::Test(const THash<TChA, TFlt>& Th, const TIntV& TstEsIndexes) {
 	IAssertR(!Th.Empty(), "Theta is empty");
 	IAssertR(!TstEsIndexes.Empty(), "Test vector is empty");
 
@@ -969,35 +969,35 @@ TPredictionResult TSignPredicNoLrn::Test(const THash<TChA, TFlt>& Th, const TInt
 	return getAccuracy(YIntV, Results, valWhenEmptyFeatV);
 }
 
-TPredictionResult TSignPredicNoLrn::Test(const THash<TChA, TFlt>& Th) {
+TPredictionResult TCTMSProbabilisticInference::Test(const THash<TChA, TFlt>& Th) {
 	TIntV seq(focusedNetEdges.Len());
 	for (int i = 0; i < focusedNetEdges.Len(); i++)
 		seq[i] = i;
 	return Test(Th, seq);
 }
 
-double TSignPredicNoLrn::CrossValidTest(const bool CalSubNet, const int NFold) {
+double TCTMSProbabilisticInference::CrossValidTest(const bool CalSubNet, const int NFold) {
 	// you can add normalization and feature selection here
 	double acc = RunValidation(NFold, CalSubNet);
 	SavePredictions();
 	return acc;
 }
 
-TPredictionResult TSignPredicNoLrn::TrainTestUseFeaV(TIntV& TrnIndxs, TIntV& TstIndxs) {
+TPredictionResult TCTMSProbabilisticInference::TrainTestUseFeaV(TIntV& TrnIndxs, TIntV& TstIndxs) {
 	THash<TChA, TFlt> th;
 	GetTheta(TrnIndxs, th);
 	TPredictionResult res = Test(th, TstIndxs);
 	return res;
 }
 
-TPredictionResult TSignPredicNoLrn::TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs) {
+TPredictionResult TCTMSProbabilisticInference::TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs) {
 	THash<TChA, TFlt> th;
 	GetTheta(net, th, NetName+"SUBNETUsed");
 	TPredictionResult res = Test(th, TstIndxs);
 	return res;
 }
 
-void TSignPredicNoLrn::SaveTheta(const THash<TChA, TFlt>& thet, const TStr fileName){
+void TCTMSProbabilisticInference::SaveTheta(const THash<TChA, TFlt>& thet, const TStr fileName){
 	FILE * S = fopen((OutputDir+fileName+"Theta.data").CStr(), "a+t");
 	for (int f = 0; f < thet.Len(); f++) {fprintf(S, "{%s}\t", thet.GetKey(f).CStr());}
 	fprintf(S, "\n");
@@ -1005,11 +1005,11 @@ void TSignPredicNoLrn::SaveTheta(const THash<TChA, TFlt>& thet, const TStr fileN
 	fclose(S);
 }
 
-void TSignPredicNoLrn::SaveTheta() {
+void TCTMSProbabilisticInference::SaveTheta() {
 	SaveTheta(theta, NetName);
 }
 
-void TSignPredicNoLrn::SaveYXV() {
+void TCTMSProbabilisticInference::SaveYXV() {
 	FILE * S = fopen((OutputDir+NetName+"Y_XP.data").CStr(), "wt");
 	FILE * L = fopen((OutputDir+NetName+"Y_XN.data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\t");
@@ -1037,7 +1037,7 @@ void TSignPredicNoLrn::SaveYXV() {
 	return;
 }
 
-void TSignPredicNoLrn::SaveDataset() {
+void TCTMSProbabilisticInference::SaveDataset() {
 	FILE * S = fopen((OutputDir+NetName+"DSet.data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\t");
 	for (int f = 0; f < Features.Len(); f++)
@@ -1053,7 +1053,7 @@ void TSignPredicNoLrn::SaveDataset() {
 	fclose(S);
 }
 
-void TSignPredicNoLrn::SavePredictions() {
+void TCTMSProbabilisticInference::SavePredictions() {
 	FILE * S = fopen((OutputDir+NetName+"Predictions.data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\tPredictions...");
 	for (int p = 0; p < Pred.Len(); p++) {

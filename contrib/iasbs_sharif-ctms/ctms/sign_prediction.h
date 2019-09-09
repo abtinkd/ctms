@@ -26,12 +26,12 @@ public:
 	static TPredictionResult getAccuracy(const TIntV& YV, const TFltV& ResultsV, const TFlt resValWhenZeroFeatV, const bool printDetailedResults = true);
 };
 
-class TSignPredictionNaive: public TSignPrediction {
+class TNaiveInference: public TSignPrediction {
 protected:
 	TFltV InDegBased, OutDegBased, weightedMeanBased, combinedDegBased, weightedCombDegBased;
 	TIntV YV;
 public:
-	TSignPredictionNaive(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
+	TNaiveInference(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
 		NetName = NtNm;
 		bNet = Net;
 		for (int i = 0; i < selectedEdges.Len(); i++) {
@@ -47,18 +47,18 @@ public:
 	}
 
 	void CalcProbs();
-	double GetInDegBasedAcc(const bool printDetails = true) {return GetAccFor(InDegBased, "In-Deg-Based", printDetails);}
-	double GetOutDegBasedAcc(const bool printDetails = true) {return GetAccFor(OutDegBased, "Out-Deg-Based", printDetails);}
-	double GetweightedMeanBasedAcc(const bool printDetails = true) {return GetAccFor(weightedMeanBased, "Weighted-Mean-Based", printDetails);}
-	double GetcombinedDegBasedAcc(const bool printDetails = true) {return GetAccFor(combinedDegBased, "Combined-Deg-Based", printDetails);}
+	double GetInDegBasedAcc(const bool printDetails = true) {return GetAccFor(InDegBased, "Rcp", printDetails);}
+	double GetOutDegBasedAcc(const bool printDetails = true) {return GetAccFor(OutDegBased, "Gnr", printDetails);}
+	double GetweightedMeanBasedAcc(const bool printDetails = true) {return GetAccFor(weightedMeanBased, "WGR", printDetails);}
+	double GetcombinedDegBasedAcc(const bool printDetails = true) {return GetAccFor(combinedDegBased, "Cmp", printDetails);}
 	double GetweightedCombDegBasedAcc(const bool printDetails = true) {return GetAccFor(weightedCombDegBased, "Weighted-Comb-Deg-Based", printDetails);}
 
 private:
 	double GetAccFor(TFltV& probV, const TStr title, const bool printDetails) {
 		TPredictionResult result = getAccuracy(YV, probV, 0.5, false);
 		if (printDetails) {
-			printf("\n_________________________________\n\n");
-			printf("%s: %.4f\nACC2: %.4f\nTPR: %.4f TNR: %.4f Z: %d IZ: %d CP: %d\n", title.CStr(),
+			printf("\n%s _________________________________\n\n", title.CStr());
+			printf("ACC: %.4f\nACC2: %.4f\nTPR: %.4f TNR: %.4f Z: %d IZ: %d CP: %d\n",
 				result.accuracy, (result.truePositive + result.trueNegative)/2.0,
 				result.truePositive, result.trueNegative,
 				result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);
@@ -77,7 +77,7 @@ protected:
 	PCtmsNet GetNet(const TIntV& Indexes);
 };
 
-class TSignPredictionLearn: public TCrossValidation {
+class TLogisticRegression: public TCrossValidation {
 private:
 	THash<TStr, TPair<TInt, TFltV>> DataSet;
 	TVec<TFltV> XV;
@@ -101,7 +101,7 @@ protected:
 	TPredictionResult TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs);
 	void FitPredictionModel(const bool ScaleF = true, const bool Newton = true);
 public:
-	TSignPredictionLearn(const PCtmsNet& Net, const TStr NtNm) {
+	TLogisticRegression(const PCtmsNet& Net, const TStr NtNm) {
 		NetName = NtNm;
 		bNet = Net;
 		for (TSignNet::TEdgeI EI = Net->BegEI(); EI < Net->EndEI(); EI++)
@@ -109,7 +109,7 @@ public:
 		ExtractDataSetPp();
 		//ExtractDataSet();
 	}
-	TSignPredictionLearn(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
+	TLogisticRegression(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
 		NetName = NtNm;
 		bNet = Net;
 		for (int i = 0; i < selectedEdges.Len(); i++) {focusedNetEdges.Add(selectedEdges[i]);}
@@ -130,7 +130,7 @@ public:
 	void SavePredictions(const TStr& FNameSuffx = TStr());
 };
 
-class TSignPredicNoLrn: public TCrossValidation {
+class TCTMSProbabilisticInference: public TCrossValidation {
 private:
 	THash<TIntTr, THash<TInt, TInt>> DataSet; // THash<TInt, TInt> : 1st TInt is Features KeyId (DataSet[x].Key <-> Features.GetKeyId(+o|-o|++)
 	TVec<THash<TInt, TInt>> PXV, NXV; //instead of saving all feature values, here we save nonzero features
@@ -156,7 +156,7 @@ protected:
 	TPredictionResult TrainTestUseFeaV(TIntV& TrnIndxs, TIntV& TstIndxs);
 	TPredictionResult TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs);
 public:
-	TSignPredicNoLrn(const PCtmsNet& Net, const TStr NtNm) {
+	TCTMSProbabilisticInference(const PCtmsNet& Net, const TStr NtNm) {
 		CreateFeatureV();
 		NetName = NtNm;
 		bNet = Net;
@@ -164,7 +164,7 @@ public:
 			focusedNetEdges.Add(TIntTr(EI.GetSrcNId(), EI.GetDstNId(), EI()));
 		ExtractDataSet();
 	}
-	TSignPredicNoLrn(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
+	TCTMSProbabilisticInference(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
 		CreateFeatureV();
 		NetName = NtNm;
 		bNet = Net;

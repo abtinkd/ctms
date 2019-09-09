@@ -2,9 +2,7 @@
 #define ctms_signed_network_h
 
 #include <Snap.h>
-#include <mxdag.h>
 #include <signnet.h>
-#include <network.h>
 
 class TCtmsNet;
 typedef TPt<TCtmsNet> PCtmsNet;
