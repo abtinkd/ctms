@@ -4,5 +4,5 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-	convertWiki(argv[1], argv[2])
+	convertWiki(argv[1], argv[2]);
 }
