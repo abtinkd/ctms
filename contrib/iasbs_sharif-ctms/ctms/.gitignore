@@ -1,4 +1,7 @@
 ctms.vcxproj.user
 .vs/
-results/
+results/*
 Debug/
+
+#keep these files
+!results/.gitkeep
