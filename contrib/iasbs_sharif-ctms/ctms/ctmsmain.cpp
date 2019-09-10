@@ -67,10 +67,7 @@ void GetMaskEdges(const PCtmsNet& OrigNet, TIntTrV& outputEdges, const int MinEm
 			outputEdges.Add(TIntTr(PosEVec[i].GetSrcNId(), PosEVec[i].GetDstNId(), PosEVec[i].GetDat()));
 			outputEdges.Add(TIntTr(NegEVec[i].GetSrcNId(), NegEVec[i].GetDstNId(), NegEVec[i].GetDat()));
 		}
-	}
-
-	printf("\n Total network edges: %d\n Prediction edges left: %d\n", OrigNet->GetEdges(), outputEdges.Len());
-	printf(" Positive edge probability: %.4f\n", (Balanced ? (double)minLen / outputEdges.Len() : (double)pos / outputEdges.Len()));
+	}	
 	return;
 }
 
@@ -83,26 +80,26 @@ void BuildNet(PCtmsNet& net, TIntTrV& maskE, const char FilePath[], const int Mi
 	cout << "extracting sub-network ..." << endl;
 	GetMaskEdges(net, maskE, MinEm, isBalanced);
 		
-	cout << "total edges: " << net->GetEdges() << endl;
-	cout << "mask edges: " << maskE.Len() << endl;	
+	cout << "\ttotal edges: " << net->GetEdges() << endl;
+	cout << "\tmask edges: " << maskE.Len() << endl;	
 
 	int pos = 0;
 	for (int i = 0; i < maskE.Len(); i++) {
 		maskE[i].GetVal3() == 1 ? ++pos : 1;
 	}	
-	printf("positive edge ratio:  %.2f\n", (double)pos / (double)maskE.Len());	
+	printf("\tpositive edge ratio:  %.2f\n", (double)pos / (double)maskE.Len());	
 	
 	return;
 }
 
 
 // runs algorithms for sign prediciton here. set algorithmsEnabled = 0 to run all algorithms
-void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const TStr outputFNm, const int algorithmsEnabled = 0)
+void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const TStr outPrefix, const int algorithmsEnabled = 0)
 {
 	if (algorithmsEnabled == 1 || algorithmsEnabled == 0) {//naive method
-		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+		cout << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: Naive method\n" << endl;
-		TNaiveInference naive(Network, outputFNm + "naive.", Edges);
+		TNaiveInference naive(Network, outPrefix + "naive.", Edges);
 		naive.GetOutDegBasedAcc();
 		naive.GetInDegBasedAcc();
 		naive.GetweightedMeanBasedAcc();
@@ -111,17 +108,17 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 	}
 
 	if (algorithmsEnabled == 2 || algorithmsEnabled == 0) {//run CTMS-based method
-		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+		cout << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: CTMS-based method (probabilistic inference, 96 CTMS classes)\n" << endl;
-		TCTMSProbabilisticInference ctmsInference(Network, outputFNm + "ctms.", Edges);
+		TCTMSProbabilisticInference ctmsInference(Network, outPrefix, Edges, (outPrefix == "" ? false : true));
 		ctmsInference.CrossValidTest(false);
 
 	}
 
 	if (algorithmsEnabled == 3 || algorithmsEnabled == 0) {//run LogReg-16triad method
-		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+		cout << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: LR method (logistic regression, 16 triad types)\n" << endl;
-		TLogisticRegression lr16Inference(Network, outputFNm + "lr16.", Edges);
+		TLogisticRegression lr16Inference(Network, outPrefix, Edges, (outPrefix == ""? false: true));
 		lr16Inference.CrossValidTest();
 	}
 
@@ -150,7 +147,7 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 	}
 
 	if (algorithmsEnabled == 5 || algorithmsEnabled == 0) {//run Heuristic Status method
-		cout << "\n\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+		cout << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		cout << "Sign prediction: Heuristic Status\n" << endl;
 		TEdgeSignPred heuristicPredition;
 		heuristicPredition.Network = &*Network;
@@ -172,8 +169,8 @@ void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const 
 			const double tpr = (double)TP / (TP + FN);
 			const double tnr = (double)TN / (TN + FP);
 			const double acc2 = (tpr + tnr) / 2.0;
-			printf("\n%s _________________________________\n\n", met[i].CStr());
-			printf("Acc: %.4f\nmean(TPR,TNR): %.4f\nTPR: %.4f TNR: %.4f\n", acc, acc2, tpr, tnr);
+			printf("\n%s _________________________________\n", met[i].CStr());
+			printf("Acc: %.4f\nmean(TPR,TNR): %.4f\nTPR: %.4f \nTNR: %.4f\n", acc, acc2, tpr, tnr);
 		}
 	}
 	return;
@@ -196,22 +193,27 @@ int main(int argc, char* argv[]) {
 
 	cout << "input file: " << filePath << endl;
 	cout << "minimum embeddedness: " << minEm << endl;
-	cout << "limit to a subnetwork of balanced edge signs: " << isBalanced;
+	cout << "limit to a random subnet of balanced edge signs: " << (isBalanced? "yes": "no") << endl;
 	
 	PCtmsNet net;
 	TIntTrV maskE;
 	BuildNet(net, maskE, filePath, minEm, isBalanced);
 	
 	do {
-		int algoRun;
-		cout << "Methods: All(0) NAIVE(1) CTMS(2) LogReg(3) BALANCE(4) STATUS(5): ";
-		cin >> algoRun; cin.ignore(INT_MAX, '\n');
+		
+		int algoRun = -1;
+		while (algoRun < 0 || algoRun > 5) {
+			cout << "Methods: All(0) NAIVE(1) CTMS(2) LogReg(3) BALANCE(4) STATUS(5): ";
+			cin >> algoRun; cin.ignore(INT_MAX, '\n');
+		}
 
 		string outPfx = "";
-		cout << "Set a name to save extracted features in [./results]. (press Enter if not needed):\n";
+		cout << "Set a net name to enable logging in <./results>. (press Enter to disable it): ";
 		getline(cin, outPfx);
 
 		runAllSignPredictionMethods(net, maskE, outPfx.c_str(), algoRun);
+		cout << "__________________________________________________________________________________\n";
+		cout << "Use another method (y/n)? ";
 	} while (getchar() != 'n' && getchar() == '\n');
 
 	return 0;
