@@ -52,14 +52,14 @@ public:
 	double GetOutDegBasedAcc(const bool printDetails = true) {return GetAccFor(OutDegBased, "Gnr", printDetails);}
 	double GetweightedMeanBasedAcc(const bool printDetails = true) {return GetAccFor(weightedMeanBased, "WGR", printDetails);}
 	double GetcombinedDegBasedAcc(const bool printDetails = true) {return GetAccFor(combinedDegBased, "Cmp", printDetails);}
-	double GetweightedCombDegBasedAcc(const bool printDetails = true) {return GetAccFor(weightedCombDegBased, "Weighted-Comb-Deg-Based", printDetails);}
+	double GetweightedCombDegBasedAcc(const bool printDetails = true) {return GetAccFor(weightedCombDegBased, "WCDB", printDetails);}
 
 private:
 	double GetAccFor(TFltV& probV, const TStr title, const bool printDetails) {
 		TPredictionResult result = getAccuracy(YV, probV, 0.5, false);
 		if (printDetails) {
 			printf("\n%s _________________________________\n\n", title.CStr());
-			printf("Acc: %.4f\nmean(TPR, TNR): %.4f\nTPR: %.4f\nTNR: %.4f \nZ: %d IZ: %d CP: %d\n",
+			printf("Acc: %.4f\nmean(TPR,TNR): %.4f\nTPR: %.4f\nTNR: %.4f \nZ: %d IZ: %d CP: %d\n",
 				result.accuracy, (result.truePositive + result.trueNegative)/2.0,
 				result.truePositive, result.trueNegative,
 				result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);

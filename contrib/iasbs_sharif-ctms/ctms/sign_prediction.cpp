@@ -111,8 +111,7 @@ double TCrossValidation::RunValidation(const int NFold, const bool alsoRunInSubN
 			CVRes.Add(res1);
 			printf("Accuracy: %.4f\n", res1.accuracy);
 		}
-		{
-			printf("\nOriginal data ---> ");
+		{			
 			TPredictionResult res2 = TrainTestUseFeaV(TrainIndexes, TestIndexes);
 			CVRes2.Add(res2);
 			printf("Accuracy: %.4f\n", res2.accuracy);
