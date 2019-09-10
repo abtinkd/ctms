@@ -37,7 +37,7 @@ TPredictionResult TSignPrediction::getAccuracy(const TIntV& YV, const TFltV& Res
 	result.criticalPointCnt = criticalPoint;
 
 	if (printDetailedResults) {
-		printf("\nTrue Positive ( %.2f ), True Negative ( %.2f ).\n", result.truePositive, result.trueNegative);
+		printf("\nTPR ( %.2f ), TNR ( %.2f ).\n", result.truePositive, result.trueNegative);
 		printf("Empty FeaVec( %d ) | Incorrect zero estimate( %d ) | CRITICAL POINTS( %d ).\n",
 			result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);
 	}
@@ -64,7 +64,7 @@ TPredictionResult TCrossValidation::CalcCVFinalResult(TVec<TPredictionResult>& f
 	const double acc2 = (result.truePositive + result.trueNegative)/2.0;
 	if (printDetails) {
 		printf("\n_________________________________\n\n");
-		printf("Mean Accuracy (%s): %.4f\nACC2: %.4f\nTPR: %.4f TNR: %.4f Z: %d IZ: %d CP: %d\n", title,
+		printf("Acc (%s): %.4f\nmean(TPR,TNR): %.4f\nTPR: %.4f\nTNR: %.4f\nZ: %d IZ: %d CP: %d\n", title,
 			result.accuracy, acc2,
 			result.truePositive, result.trueNegative,
 			result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);
@@ -324,7 +324,7 @@ void TLogisticRegression::ExtractDataSetPp() {
 	TIntV NbrsV;
 
 	CreateFeatureVPp();
-	printf("Extracting DataSet (Only 16 Triads).\n");
+	printf("Extracting edge features (16 Triads).\n");
 	int c = 0, ECnt = (focusedNetEdges.Len()/100) +1;
 	for (int i = 0; i < focusedNetEdges.Len(); i++) {
 		const TIntTr CurE(focusedNetEdges[i]);
@@ -505,6 +505,7 @@ TPredictionResult TLogisticRegression::TrainTestUseNet(PCtmsNet& net, TIntV& Tst
 }
 
 void TLogisticRegression::SaveDataset(const TStr& Suffx) {
+	if (!is_logged) return;
 	FILE * S = fopen((OutputDir+NetName+"DSet"+Suffx+".data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\t");
 	for (int f = 0; f < Features.Len(); f++) {fprintf(S, "{%s}\t", (Features[f]).CStr());}
@@ -517,6 +518,7 @@ void TLogisticRegression::SaveDataset(const TStr& Suffx) {
 }
 
 void TLogisticRegression::SaveYXV(const TStr& Suffx) {
+	if (!is_logged) return;
 	FILE * S = fopen((OutputDir+NetName+"Y_X"+Suffx+".data").CStr(), "wt");
 	fprintf(S, "#Label\t");
 	for (int f = 0; f < Features.Len(); f++) {fprintf(S, "{%s}\t", (Features[f]).CStr());}
@@ -528,6 +530,7 @@ void TLogisticRegression::SaveYXV(const TStr& Suffx) {
 }
 
 void TLogisticRegression::SaveTheta(const TStr& Suffx) {
+	if (!is_logged) return;
 	FILE * S = fopen((OutputDir+NetName+"Theta"+Suffx+".data").CStr(), "a+t");
 	TFltV thet; LRModel->GetTheta(thet);
 	fprintf(S, "#Theta0\t");
@@ -538,6 +541,7 @@ void TLogisticRegression::SaveTheta(const TStr& Suffx) {
 }
 
 void TLogisticRegression::SavePredictions(const TStr& Suffx) {
+	if (!is_logged) return;
 	FILE * S = fopen((OutputDir+NetName+"Predictions"+Suffx+".data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\tPrediction");
 	for (int p = 0; p < Pred.Len(); p++)
@@ -695,9 +699,9 @@ void TCTMSProbabilisticInference::GetTheta(const TIntV& TrnIndices, THash<TChA, 
 		thta[t] = Surp;
 	}
 	thta("theta0") = 0.0;
-	SaveTheta(thta, NetName);
+	if (is_logged) SaveTheta(thta, NetName);
 	normalize(thta);
-	SaveTheta(thta, NetName + "Normal");
+	if (is_logged) SaveTheta(thta, NetName + "Normal");
 	printf("[%s]\n", Tm.GetStr());
 	return;
 }
@@ -903,7 +907,7 @@ void TCTMSProbabilisticInference::ExtractDataSet() {
 	bNetPosProb = CalcEffectiveEsPosProb(bNet);
 	printf("\r100%%  [%s]\n", Tm.GetStr());
 	SaveDataset();
-	SaveYXV();
+	SaveYXV();	
 	return;
 }
 
@@ -997,7 +1001,7 @@ TPredictionResult TCTMSProbabilisticInference::TrainTestUseNet(PCtmsNet& net, TI
 	return res;
 }
 
-void TCTMSProbabilisticInference::SaveTheta(const THash<TChA, TFlt>& thet, const TStr fileName){
+void TCTMSProbabilisticInference::SaveTheta(const THash<TChA, TFlt>& thet, const TStr fileName){	
 	FILE * S = fopen((OutputDir+fileName+"Theta.data").CStr(), "a+t");
 	for (int f = 0; f < thet.Len(); f++) {fprintf(S, "{%s}\t", thet.GetKey(f).CStr());}
 	fprintf(S, "\n");
@@ -1006,10 +1010,12 @@ void TCTMSProbabilisticInference::SaveTheta(const THash<TChA, TFlt>& thet, const
 }
 
 void TCTMSProbabilisticInference::SaveTheta() {
+	if (!is_logged) return;
 	SaveTheta(theta, NetName);
 }
 
 void TCTMSProbabilisticInference::SaveYXV() {
+	if (!is_logged) return;
 	FILE * S = fopen((OutputDir+NetName+"Y_XP.data").CStr(), "wt");
 	FILE * L = fopen((OutputDir+NetName+"Y_XN.data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\t");
@@ -1038,6 +1044,7 @@ void TCTMSProbabilisticInference::SaveYXV() {
 }
 
 void TCTMSProbabilisticInference::SaveDataset() {
+	if (!is_logged) return;
 	FILE * S = fopen((OutputDir+NetName+"DSet.data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\t");
 	for (int f = 0; f < Features.Len(); f++)
@@ -1054,6 +1061,7 @@ void TCTMSProbabilisticInference::SaveDataset() {
 }
 
 void TCTMSProbabilisticInference::SavePredictions() {
+	if (!is_logged) return;
 	FILE * S = fopen((OutputDir+NetName+"Predictions.data").CStr(), "wt");
 	fprintf(S, "#Edge\tLabel\tPredictions...");
 	for (int p = 0; p < Pred.Len(); p++) {

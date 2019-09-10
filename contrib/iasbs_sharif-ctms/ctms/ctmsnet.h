@@ -43,7 +43,6 @@ public:
 	
 	// implemented in ctmsnet.cpp	
 	static PCtmsNet LoadSignedNet(const TStr& InFNm, const int& SrcColId = 0, const int& DstColId = 1, const int& SignColId = 2);
-	PCtmsNet LoadEpinionsModified(const TStr& FNm);
 	PCtmsNet CopyNet() const;
 	PCtmsNet GetBalSgnProbSubNet();
 	PCtmsNet GetMinEmbeddedSubNet(const int MinEmValue);
@@ -54,7 +53,6 @@ public:
 	PCtmsNet RewireNetwork2(const int &NSwitch = 0, const bool separateHash = true);
 	PCtmsNet RewireNetwork(const int &NSwitch);
 	PCtmsNet PermuteEdgeSigns2();
-	PCtmsNet PermuteEdgeSignsStrict2();
 	int GetStrictSgnPermSets(PCtmsNet& Net, THash<TIntPr, TIntVPr>& PermutableGroups);
 	int GetAllEdgeSgnPermSets(PCtmsNet& Net, TSignNet::TEdgeI& EI, TVec<TIntPrPr>& ESgnPermSets);
 	double GetEdgePosSgnProb(const int& SrcNdId, const int& DstNdId);

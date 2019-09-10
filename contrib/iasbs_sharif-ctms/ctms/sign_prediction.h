@@ -19,6 +19,7 @@ class TSignPrediction {
 protected:
 	TStr NetName;
 	PCtmsNet bNet;
+	bool is_logged;
 	TIntTrV focusedNetEdges;
 	THashSet<TChA> Features; //TChA is Feature string. Its corresponding Int ID is hash KeyId (int KeyId -> TChA Feature String)
 	
@@ -58,7 +59,7 @@ private:
 		TPredictionResult result = getAccuracy(YV, probV, 0.5, false);
 		if (printDetails) {
 			printf("\n%s _________________________________\n\n", title.CStr());
-			printf("ACC: %.4f\nACC2: %.4f\nTPR: %.4f TNR: %.4f Z: %d IZ: %d CP: %d\n",
+			printf("Acc: %.4f\nmean(TPR, TNR): %.4f\nTPR: %.4f\nTNR: %.4f \nZ: %d IZ: %d CP: %d\n",
 				result.accuracy, (result.truePositive + result.trueNegative)/2.0,
 				result.truePositive, result.trueNegative,
 				result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);
@@ -101,16 +102,18 @@ protected:
 	TPredictionResult TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs);
 	void FitPredictionModel(const bool ScaleF = true, const bool Newton = true);
 public:
-	TLogisticRegression(const PCtmsNet& Net, const TStr NtNm) {
-		NetName = NtNm;
+	TLogisticRegression(const PCtmsNet& Net, const TStr NtNm, const bool isLogged = false) {
+		is_logged = isLogged;
+		NetName = NtNm + ".LR.";
 		bNet = Net;
 		for (TSignNet::TEdgeI EI = Net->BegEI(); EI < Net->EndEI(); EI++)
 			focusedNetEdges.Add(TIntTr(EI.GetSrcNId(), EI.GetDstNId(), EI()));
 		ExtractDataSetPp();
 		//ExtractDataSet();
 	}
-	TLogisticRegression(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
-		NetName = NtNm;
+	TLogisticRegression(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges, const bool isLogged = false) {
+		is_logged = isLogged;
+		NetName = NtNm + ".LR.";
 		bNet = Net;
 		for (int i = 0; i < selectedEdges.Len(); i++) {focusedNetEdges.Add(selectedEdges[i]);}
 		ExtractDataSetPp();
@@ -156,17 +159,19 @@ protected:
 	TPredictionResult TrainTestUseFeaV(TIntV& TrnIndxs, TIntV& TstIndxs);
 	TPredictionResult TrainTestUseNet(PCtmsNet& net, TIntV& TstIndxs);
 public:
-	TCTMSProbabilisticInference(const PCtmsNet& Net, const TStr NtNm) {
+	TCTMSProbabilisticInference(const PCtmsNet& Net, const TStr NtNm, const bool isLogged = false) {
 		CreateFeatureV();
-		NetName = NtNm;
+		is_logged = isLogged;
+		NetName = NtNm + ".CTMS.";
 		bNet = Net;
 		for (TSignNet::TEdgeI EI = Net->BegEI(); EI < Net->EndEI(); EI++)
 			focusedNetEdges.Add(TIntTr(EI.GetSrcNId(), EI.GetDstNId(), EI()));
 		ExtractDataSet();
 	}
-	TCTMSProbabilisticInference(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges) {
+	TCTMSProbabilisticInference(const PCtmsNet& Net, const TStr NtNm, TIntTrV& selectedEdges, const bool isLogged = false) {
 		CreateFeatureV();
-		NetName = NtNm;
+		is_logged = isLogged;
+		NetName = NtNm + ".CTMS.";
 		bNet = Net;
 		for (int i = 0; i < selectedEdges.Len(); i++) {focusedNetEdges.Add(selectedEdges[i]);}
 		ExtractDataSet();

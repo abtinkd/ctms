@@ -87,26 +87,6 @@ bool TCtmsNet::operator!=(const TCtmsNet& SgnNet) const {
 	return !(*this == SgnNet);
 }
 
-// Modified Load function of Snap signnet.
-PCtmsNet TCtmsNet::LoadEpinionsModified(const TStr& FNm) {
-	TSsParser Ss(FNm, ssfWhiteSep, true, true, true);
-	PCtmsNet Net = TCtmsNet::New();
-	while (Ss.Next()) {
-		const int src = Ss.GetInt(0);
-		const int dst = Ss.GetInt(1);
-		const int sgn = Ss.GetInt(2);
-		if (src == dst) { continue; } // skip self edges
-		if (!Net->IsNode(src)) {
-			Net->AddNode(src);
-		}
-		if (!Net->IsNode(dst)) {
-			Net->AddNode(dst);
-		}
-		Net->AddEdge(src, dst, sgn);
-	}
-	return Net;
-}
-
 PCtmsNet TCtmsNet::LoadSignedNet(const TStr& InFNm, const int& SrcColId, const int& DstColId, const int& SignColId) {
 	TSsParser Ss(InFNm, ssfWhiteSep, true, true, true);
 	PCtmsNet Graph = TCtmsNet::New();
@@ -398,44 +378,6 @@ int TCtmsNet::GetStrictSgnPermSets(PCtmsNet& Net, THash<TIntPr, TIntVPr>& Permut
 		}
 	}
 	return PermutableSets.Len();
-}
-//This function is dummy.. can be deleted
-PCtmsNet TCtmsNet::PermuteEdgeSignsStrict2() {
-	PCtmsNet Net = CopyNet();
-	int SuccCnt = 0, fail = 0;
-	THash<TIntPr, TIntVPr> PermGrps;
-	int sz = GetStrictSgnPermSets(Net, PermGrps);
-	printf("Permutable-set Size: %d\n", sz);
-	TInt::Rnd.Randomize();
-	for (int i = 0; i < PermGrps.Len(); i++) {
-		const int bNdId = PermGrps.GetKey(i).Val1;
-		const int dNdId = PermGrps.GetKey(i).Val2;
-		IAssert(bNdId != dNdId);
-		for (int v1c = 0; v1c < PermGrps[i].Val1.Len(); v1c++) {
-			for (int v2c = 0; v2c < PermGrps[i].Val2.Len(); v2c++) {
-				if (TInt::Rnd.GetUniDev() < 0.5) { continue; }
-				const int mNdId1 = PermGrps[i].Val1[v1c];
-				const int mNdId2 = PermGrps[i].Val2[v2c];
-				TSignNet::TEdgeI EOut1, EOut2, EIn1, EIn2;
-				EOut1 = Net->GetEI(bNdId, mNdId1);
-				EOut2 = Net->GetEI(bNdId, mNdId2);
-				EIn1 = Net->GetEI(dNdId, mNdId1);
-				EIn2 = Net->GetEI(dNdId, mNdId2);
-				// Reversign the sign
-				if (EOut1() != EOut2() && EIn1() != EIn2() && EOut1() != EIn1()) {
-					EOut1() = EOut1() * (-1);
-					EOut2() = EOut2() * (-1);
-					EIn1() = EIn1() * (-1);
-					EIn2() = EIn2() * (-1);
-					SuccCnt++;
-				}
-				else { fail++; }
-			}
-		}
-	}
-	printf("Successful Permutations: %d\n", SuccCnt);
-	printf("Failed Permutations: %d\n", fail);
-	return Net;
 }
 
 int TCtmsNet::GetAllEdgeSgnPermSets(PCtmsNet& Net, TSignNet::TEdgeI& EI, TVec<TIntPrPr>& ESgnPermSets) {
