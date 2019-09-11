@@ -8,14 +8,18 @@
 using namespace std;
 
 
-// Prints on the consol all kinds of distinct triads (signed or not, bidirected or not, include zero edge side or not)
+// Prints all kinds of distinct triads (signed/unsgined, mono/bidirected, with/without no edge sides)
 void PrintTriadEquiClasses() {
+	cout << "printing distribution of triad classes according to sign/direction/noEdge status..." << endl;
 	bool Zero[] = { false, true }, BiDir[] = { false, true }, Signed[] = { false, true };
 	for (bool b : BiDir)
 		for (bool s : Signed)
 			for (bool z : Zero)
 			{
-				cout << (s ? "Signed-" : "UnSigned-") << (b ? "BiDirection-" : "MonoDirection-") << (z ? "Zero Edge" : "No Zero Edge") << endl;
+				cout << (s ? "Signed" : "UnSigned") << " - " <<
+					(b ? "BiDirection" : "MonoDirection") << " - " <<
+					(z ? "Zero Edge premitted" : "No Zero Edge permitted") << endl;
+				cout << "#\tclass\t\tcount\tPr" << endl;
 				TTriadEqClasH TriadGroups;
 				int totalTriads = 0;
 				TCtmsNet::GenTriadEquivClasses(TriadGroups, b, s, z);
@@ -23,9 +27,11 @@ void PrintTriadEquiClasses() {
 					for (int j = 0; j < TriadGroups.Len(); j++) { totalTriads += TriadGroups[j].Val2; }
 				}
 				for (int j = 0; j < TriadGroups.Len(); j++) {
-					std::cout << j + 1 << ".\t" << TriadGroups[j].Val2 << "\t" << (double)TriadGroups[j].Val2 / totalTriads << "\t" << TriadGroups[j].Val1->GetTriadStr().CStr() << std::endl;
+					cout << j + 1 << ".\t" << TriadGroups[j].Val1->GetTriadStr().CStr() <<
+						"\t" << TriadGroups[j].Val2 << "\t" << (double)TriadGroups[j].Val2 / totalTriads << endl;
 				}
-				std::cout << "Distinct Triads/Total Triads: " << TriadGroups.Len() << " / " << totalTriads << std::endl;
+				cout << "Distinct Triads/Total Triads: " << TriadGroups.Len() << " / " << totalTriads << endl;
+				cout << "press Enter to continue..";
 				getchar();
 			}
 }
@@ -94,7 +100,7 @@ void BuildNet(PCtmsNet& net, TIntTrV& maskE, const char FilePath[], const int Mi
 
 
 // runs algorithms for sign prediciton here. set algorithmsEnabled = 0 to run all algorithms
-void runAllSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const TStr outPrefix, const int algorithmsEnabled = 0)
+void runSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const TStr outPrefix, const int algorithmsEnabled = 0)
 {
 	if (algorithmsEnabled == 1 || algorithmsEnabled == 0) {//naive method
 		cout << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -211,7 +217,7 @@ int main(int argc, char* argv[]) {
 		cout << "Set a net name to enable logging in <./results>. (press Enter to disable it): ";
 		getline(cin, outPfx);
 
-		runAllSignPredictionMethods(net, maskE, outPfx.c_str(), algoRun);
+		runSignPredictionMethods(net, maskE, outPfx.c_str(), algoRun);
 		cout << "__________________________________________________________________________________\n";
 		cout << "Use another method (y/n)? ";
 	} while (getchar() != 'n' && getchar() == '\n');
