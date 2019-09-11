@@ -76,7 +76,7 @@ int TLogRegFit::MLENewton(const double& ChangeEps, const int& MaxStep, const TSt
       if(Theta[i] < MinVal) { Theta[i] = MinVal;}
       if(Theta[i] > MaxVal) { Theta[i] = MaxVal;}
     }
-	// Abtin
+	// Me
 	printf("\r%60s",""); // Clearing line
 	printf("\r[%.0f%% - %s]    {LRate: %.3f,  Incr: %.3f>%.3f}",(double)100*iter/MaxStep, ExeTm.GetTmStr(), LearnRate, Increment, ChangeEps);
   }
@@ -121,7 +121,7 @@ int TLogRegFit::MLEGradient(const double& ChangeEps, const int& MaxStep, const T
       IterLV.Add(TIntFltPr(iter, L));
       IterGradNormV.Add(TIntFltPr(iter, TLinAlg::Norm(GradV)));
     }
-    // Abtin
+    // Me
 	printf("\r%60s",""); // Clearing line
 	printf("\r[%.0f%% - %s]    {LRate: %.3f  Grad:%.3f>%.3f}",(double)100*iter/MaxStep, ExeTm.GetTmStr(), LearnRate, TLinAlg::Norm(GradV), ChangeEps);
   }

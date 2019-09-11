@@ -38,8 +38,8 @@ TPredictionResult TSignPrediction::getAccuracy(const TIntV& YV, const TFltV& Res
 
 	if (printDetailedResults) {
 		printf("\nTPR ( %.2f ), TNR ( %.2f ).\n", result.truePositive, result.trueNegative);
-		printf("Empty FeaVec( %d ) | Incorrect zero estimate( %d ) | CRITICAL POINTS( %d ).\n",
-			result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);
+//		printf("Empty FeaVec( %d ) | Incorrect zero estimate( %d ) | CRITICAL POINTS( %d ).\n",
+//			result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);
 	}
 
 	return result;
@@ -64,10 +64,13 @@ TPredictionResult TCrossValidation::CalcCVFinalResult(TVec<TPredictionResult>& f
 	const double acc2 = (result.truePositive + result.trueNegative)/2.0;
 	if (printDetails) {
 		printf("\n_________________________________\n\n");
-		printf("Acc (%s): %.4f\nmean(TPR,TNR): %.4f\nTPR: %.4f\nTNR: %.4f\nZ: %d IZ: %d CP: %d\n", title,
+		printf("Acc: %.4f\nmean(TPR,TNR): %.4f\nTPR: %.4f\nTNR: %.4f\n",
+			result.accuracy, acc2,
+			result.truePositive, result.trueNegative);
+		/*printf("Acc (%s): %.4f\nmean(TPR,TNR): %.4f\nTPR: %.4f\nTNR: %.4f\nZ: %d IZ: %d CP: %d\n", title,
 			result.accuracy, acc2,
 			result.truePositive, result.trueNegative,
-			result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);
+			result.zeroFeaVCnt, result.incorrectZeroPredCnt, result.criticalPointCnt);*/
 	}
 	return result;
 }
@@ -109,12 +112,12 @@ double TCrossValidation::RunValidation(const int NFold, const bool alsoRunInSubN
 			printf("Using subnet ---> ");
 			TPredictionResult res1 = TrainTestUseNet(foldNet, TestIndexes);
 			CVRes.Add(res1);
-			printf("Accuracy: %.4f\n", res1.accuracy);
+			printf("Acc: %.4f\n", res1.accuracy);
 		}
 		{			
 			TPredictionResult res2 = TrainTestUseFeaV(TrainIndexes, TestIndexes);
 			CVRes2.Add(res2);
-			printf("Accuracy: %.4f\n", res2.accuracy);
+			printf("Acc: %.4f\n", res2.accuracy);
 		}
 	}
 	if (alsoRunInSubNetMode)
@@ -186,7 +189,7 @@ void TNaiveInference::CalcProbs() {
 //TLogisticRegression
 
 /*
-Describtion:
+Description:
 Ex. (A -N- B ) where (A,B) is the edge we want to estimate its sign and N is the neighbour
 For making feature vector, we must first create all kinds of distinct triads with properties: Sign & Bidirection.
 These traids can have zero edge side, because after removing the specified edge from triad, one side of triad may get lost; if it's
@@ -323,7 +326,7 @@ void TLogisticRegression::ExtractDataSetPp() {
 	TIntV NbrsV;
 
 	CreateFeatureVPp();
-	printf("Extracting edge features (16 Triads).\n");
+	printf("Extracting edge-feature matrix from the network (16 Triads) ...\n");
 	int c = 0, ECnt = (focusedNetEdges.Len()/100) +1;
 	for (int i = 0; i < focusedNetEdges.Len(); i++) {
 		const TIntTr CurE(focusedNetEdges[i]);
@@ -647,7 +650,7 @@ TIntPr GetClassPosNegECount(const TChA TriClassStr, const THashSet<TChA>& Feas) 
 
 void TCTMSProbabilisticInference::GetTheta(const TIntV& TrnIndices, THash<TChA, TFlt>& thta) {
 	TExeTm Tm;
-	printf("Calculating Theta using new function ...\n");
+	printf("Calculating Theta ...\n");
 	THash<TChA, TInt> actualCTMSsCnt, CTMSsIfPos, CTMSsIfNeg;
 
 	for (int i = 0; i < Features.Len(); i++) {
@@ -660,7 +663,7 @@ void TCTMSProbabilisticInference::GetTheta(const TIntV& TrnIndices, THash<TChA, 
 
 	TIntV NbrV;
 	int PosEListSize = 0, AllTriadsCnt = 0;
-	int c=0, Decile=int(TrnIndices.Len()/100.0)+1; //Abtin: +1 is to prevent docile get zero.
+	int c=0, Decile=int(TrnIndices.Len()/100.0)+1; // +1 is to prevent docile get zero.
 	for (int i = 0; i < TrnIndices.Len(); i++) {
 		const TIntTr CurE(focusedNetEdges[TrnIndices[i]]);
 		IAssertR(DataSet.IsKey(CurE), "Edge does not exist in the DataSet!");
@@ -722,7 +725,7 @@ void TCTMSProbabilisticInference::GetThetaEmBased(const TIntV& TrnIndices, THash
 
 	TIntV NbrV;
 	int PosEListSize = 0, AllTriadsCnt = 0;
-	int c=0, Decile=int(TrnIndices.Len()/100.0)+1; //Abtin: +1 is to prevent docile get zero.
+	int c=0, Decile=int(TrnIndices.Len()/100.0)+1; // +1 is to prevent docile get zero.
 	for (int i = 0; i < TrnIndices.Len(); i++) {
 		const TIntTr CurE(focusedNetEdges[TrnIndices[i]]);
 		IAssertR(DataSet.IsKey(CurE), "Edge does not exist in the DataSet!");
@@ -801,9 +804,9 @@ void TCTMSProbabilisticInference::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt
 	TIntV NbrV;
 	double AllPlusE=0, AllE = Net->GetEdges();
 	int  emptyFeVEs = 0, emptyFeVPosEs = 0; // for calculating theta0
-	//Abtin added
+	//Me added
 	int AllTriadsCnt = 0;
-	int c=0, Decile=int(AllE/100)+1; //Abtin: +1 is to prevent docile get zero.
+	int c=0, Decile=int(AllE/100)+1; //Me: +1 is to prevent docile get zero.
 	for (TSignNet::TEdgeI EI = Net->BegEI(); EI < Net->EndEI(); EI++) {
 		TSnap::GetCmnNbrs(Net, EI.GetSrcNId(), EI.GetDstNId(), NbrV);
 		if (NbrV.Len() == 0) { // all features were zero so this edge has no triad around and no common neighbour
@@ -823,13 +826,13 @@ void TCTMSProbabilisticInference::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt
 	}
 	const double PlusProb = AllPlusE / AllE;
 	int SigTriadsClasPresent = 0, UnSigTriadsClasPresent = 0;
-	//Abtin: Each Triad is counted according to the number of edges present in it
+	//Me: Each Triad is counted according to the number of edges present in it
 	for (int t = 0; t < SgnTriCnt.Len(); t++) {
 		const int E = SgnTriCnt[t].Val1->GetEdges();
 		SgnTriCnt[t].Val2 /= E; 
 		AllTriadsCnt += SgnTriCnt[t].Val2;
 	}
-	//Abtin: Each Triad is counted according to the number of edges present in it
+	//Me: Each Triad is counted according to the number of edges present in it
 	for (int u = 0; u < UnsgnTriCnt.Len(); u++) {
 		const int E = UnsgnTriCnt[u].Val1->GetEdges();
 		UnsgnTriCnt[u].Val2 /= E;
@@ -863,7 +866,7 @@ void TCTMSProbabilisticInference::GetTheta(const PCtmsNet& Net, THash<TChA, TFlt
 void TCTMSProbabilisticInference::ExtractDataSet() {
 	TExeTm Tm;
 	TIntV NbrsV;
-	printf("Extracting DataSet.. \n");
+	printf("Extracting edge-feature matrix from the network ... \n");
 	PXV.Gen(focusedNetEdges.Len());
 	NXV.Gen(focusedNetEdges.Len());
 	YV.Gen(focusedNetEdges.Len());

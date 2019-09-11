@@ -117,7 +117,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\snap-core\Snap.cpp" />
     <ClCompile Include="..\..\..\snap-exp\signnet.cpp" />
-    <ClCompile Include="convert_wikipedia.cpp" />
     <ClCompile Include="ctmsmain.cpp" />
     <ClCompile Include="ctmsnet.cpp" />
     <ClCompile Include="ml.cpp" />
@@ -126,7 +125,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\snap-core\Snap.h" />
     <ClInclude Include="..\..\..\snap-exp\signnet.h" />
-    <ClInclude Include="convert_wikipedia.h" />
     <ClInclude Include="ctmsnet.h" />
     <ClInclude Include="ml.h" />
     <ClInclude Include="sign_prediction.h" />

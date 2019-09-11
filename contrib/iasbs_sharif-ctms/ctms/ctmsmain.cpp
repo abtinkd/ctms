@@ -8,7 +8,7 @@
 using namespace std;
 
 
-// Prints on the consol all kinds of distinct triads (signed or not, bidirected or not, include zero edge or not)
+// Prints on the consol all kinds of distinct triads (signed or not, bidirected or not, include zero edge side or not)
 void PrintTriadEquiClasses() {
 	bool Zero[] = { false, true }, BiDir[] = { false, true }, Signed[] = { false, true };
 	for (bool b : BiDir)
@@ -74,20 +74,20 @@ void GetMaskEdges(const PCtmsNet& OrigNet, TIntTrV& outputEdges, const int MinEm
 
 void BuildNet(PCtmsNet& net, TIntTrV& maskE, const char FilePath[], const int MinEm, const bool isBalanced)
 {	
-	cout << "loading network ..." << endl;
+	cout << "loading full network ..." << endl;
 	net = TCtmsNet::LoadSignedNet(FilePath);		
 
-	cout << "extracting sub-network ..." << endl;
+	cout << "extracting sub network ..." << endl;
 	GetMaskEdges(net, maskE, MinEm, isBalanced);
 		
-	cout << "\ttotal edges: " << net->GetEdges() << endl;
-	cout << "\tmask edges: " << maskE.Len() << endl;	
+	cout << "  fullnet edge count: " << net->GetEdges() << endl;
+	cout << "  sub-net edge count: " << maskE.Len() << endl;	
 
 	int pos = 0;
 	for (int i = 0; i < maskE.Len(); i++) {
 		maskE[i].GetVal3() == 1 ? ++pos : 1;
 	}	
-	printf("\tpositive edge ratio:  %.2f\n", (double)pos / (double)maskE.Len());	
+	printf("  positive edge ratio:  %.2f\n", (double)pos / (double)maskE.Len());	
 	
 	return;
 }

@@ -112,7 +112,7 @@ PCtmsNet TCtmsNet::GenRewire(const int& NSwitch, TRnd Rnd) const {
 	// generate a Network that satisfies the constraints
 	printf("\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 	printf("Randomizing edges (%d, %d)...\n", Nodes, Edges);
-	//Abtin: Instead of TIntPairSet we use TIntTripleSet for Edge and its data. //TIntPrSet EdgeSet(Edges);
+	//Me: Instead of TIntPairSet we use TIntTripleSet for Edge and its data. //TIntPrSet EdgeSet(Edges);
 	typedef THashSet<TIntTr> TIntTrSet;
 	TIntTrSet EdgeSet(Edges);
 	THashSet<TInt> EdgeDatSet; //This can hold multiple signs (instead of only + and -) so we can rewire multiple signed subnets
@@ -126,21 +126,21 @@ PCtmsNet TCtmsNet::GenRewire(const int& NSwitch, TRnd Rnd) const {
 	}
 	// edge switching
 	uint skip = 0;
-	//Abtin
+	//Me
 	uint succsSwps = 0, skip2 = 0, skip3 = 0;
 	for (uint swps = 0; swps < 2 * uint(Edges)*uint(NSwitch); swps++) {
 		const int keyId1 = EdgeSet.GetRndKeyId(Rnd);
-		//Abtin
+		//Me
 		Rnd.Randomize();
 		const int keyId2 = EdgeSet.GetRndKeyId(Rnd);
 		if (keyId1 == keyId2) { skip++; continue; }
 		const TIntTr& E1 = EdgeSet[keyId1];
 		const TIntTr& E2 = EdgeSet[keyId2];
-		//Abtin added next line. Don't swap + and - edges
+		//Me added next line. Don't swap + and - edges
 		if (E1.Val3 != E2.Val3) { skip++; skip2++; continue; }
-		//Abtin (a,b,sign) & (c,d,sign) --(swap)--> (a,d,sign) & (c,b,sign)
+		//Me (a,b,sign) & (c,d,sign) --(swap)--> (a,d,sign) & (c,b,sign)
 		TIntTr NewE1(E1.Val1, E2.Val2, E1.Val3), NewE2(E2.Val1, E1.Val2, E2.Val3);
-		//Abtin: Looks if there is a similar Edge in the Network with any Edge Data (Sign). Generalizing only +/- form
+		//Me: Looks if there is a similar Edge in the Network with any Edge Data (Sign). Generalizing only +/- form
 		bool IsAlreadyEdge = false;
 		for (int EDSetKeyId = 0; EDSetKeyId < EdgeDatSet.Len(); EDSetKeyId++) {
 			if (EdgeSet.IsKey(TIntTr(E1.Val1, E2.Val2, EdgeDatSet[EDSetKeyId]))) { IsAlreadyEdge = true; break; } //NewE1 with all possible Edge Data
@@ -148,15 +148,15 @@ PCtmsNet TCtmsNet::GenRewire(const int& NSwitch, TRnd Rnd) const {
 		}
 		if (IsAlreadyEdge) { skip++; skip3++; continue; }
 		/* Replaced following code with above to support multiple (more than 2) signs
-		//Abtin added next 4 line. If new edges is in the hash list so we can't swap.
+		//Me added next 4 line. If new edges is in the hash list so we can't swap.
 		if (EdgeSet.IsKey(TIntTr(E1.Val1, E2.Val2, E1.Val3))) { skip++; skip3++; continue; } //NewE1
 		if (EdgeSet.IsKey(TIntTr(E1.Val1, E2.Val2, -E1.Val3))) { skip++; skip3++; continue; } //NewE1 converted sign
 		if (EdgeSet.IsKey(TIntTr(E2.Val1, E1.Val2, E2.Val3))) { skip++; skip3++; continue; } //NewE2
 		if (EdgeSet.IsKey(TIntTr(E2.Val1, E1.Val2, -E2.Val3))) { skip++; skip3++; continue; } //NewE2 converted sign
 		*/
-		//Abtin added the next line.
+		//Me added the next line.
 		if (NewE1.Val1 == NewE1.Val2 || NewE2.Val1 == NewE2.Val2) { skip++; }
-		//Abtin changed the next line --> PREVIOUS: NewE1.Val1!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val2
+		//Me changed the next line --> PREVIOUS: NewE1.Val1!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val2
 		else if (NewE1.Val1 != NewE2.Val1 && NewE1.Val1 != NewE2.Val2 && NewE1.Val2 != NewE2.Val1 && NewE1.Val2 != NewE2.Val2 && !EdgeSet.IsKey(NewE1) && !EdgeSet.IsKey(NewE2)) {
 			EdgeSet.DelKeyId(keyId1);  EdgeSet.DelKeyId(keyId2);
 			EdgeSet.AddKey(TIntTr(NewE1));
@@ -186,7 +186,7 @@ void SwitchEdges(TIntTrSet& EdgeSet, TIntTrSet& EdgeSetOther, const int& NSwitch
 	printf("Randomizing Subnet edges (%d edge)...\n", EdgeSet.Len());
 	TExeTm ExeTm;
 	uint skip = 0;
-	//Abtin
+	//Me
 	uint succsSwps = 0, skip3 = 0; //skip2 was for Sign collision which is not meaningful here
 	for (uint swps = 0; swps < 2 * uint(EdgeSet.Len())*uint(NSwitch); swps++) {
 		const int keyId1 = EdgeSet.GetRndKeyId(Rnd);
@@ -194,16 +194,16 @@ void SwitchEdges(TIntTrSet& EdgeSet, TIntTrSet& EdgeSetOther, const int& NSwitch
 		if (keyId1 == keyId2) { skip++; continue; }
 		const TIntTr& E1 = EdgeSet[keyId1];
 		const TIntTr& E2 = EdgeSet[keyId2];
-		//Abtin (a,b,sign) & (c,d,sign) --(swap)--> (a,d,sign) & (c,b,sign)
+		//Me (a,b,sign) & (c,d,sign) --(swap)--> (a,d,sign) & (c,b,sign)
 		TIntTr NewE1(E1.Val1, E2.Val2, E1.Val3), NewE2(E2.Val1, E1.Val2, E2.Val3);
-		//Abtin added next 4 line. If new edges is in the hash list so we can't swap.
+		//Me added next 4 line. If new edges is in the hash list so we can't swap.
 		if (EdgeSet.IsKey(TIntTr(E1.Val1, E2.Val2, E1.Val3))) { skip++; skip3++; continue; } //NewE1
 		if (EdgeSet.IsKey(TIntTr(E2.Val1, E1.Val2, E2.Val3))) { skip++; skip3++; continue; } //NewE2
 		if (EdgeSetOther.IsKey(TIntTr(E1.Val1, E2.Val2, -E1.Val3))) { skip++; skip3++; continue; } //NewE1 converted sign
 		if (EdgeSetOther.IsKey(TIntTr(E2.Val1, E1.Val2, -E2.Val3))) { skip++; skip3++; continue; } //NewE2 converted sign
-																								   //Abtin added the next line.
+																								   //Me added the next line.
 		if (NewE1.Val1 == NewE1.Val2 || NewE2.Val1 == NewE2.Val2) { skip++; }
-		//Abtin changed the next line --> PREVIOUS: NewE1.Val1!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val2
+		//Me changed the next line --> PREVIOUS: NewE1.Val1!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val1 && NewE1.Val2!=NewE2.Val2
 		else if (NewE1.Val1 != NewE2.Val1 && NewE1.Val1 != NewE2.Val2 && NewE1.Val2 != NewE2.Val1 && NewE1.Val2 != NewE2.Val2 && !EdgeSet.IsKey(NewE1) && !EdgeSet.IsKey(NewE2)) {
 			EdgeSet.DelKeyId(keyId1);  EdgeSet.DelKeyId(keyId2);
 			EdgeSet.AddKey(TIntTr(NewE1));
@@ -853,10 +853,10 @@ void TCtmsNet::CountSignedTriads2(const TStr& OutFNm) const {
 	TIntV NbrV;
 	PSignNet ThisPt = PSignNet((TSignNet*) this);
 	double AllPlusE = 0, AllE = GetEdges();
-	//Abtin added
+	//Me added
 	int AllTriadsCnt = 0;
 
-	int c = 0, Decile = int(AllE / 100) + 1; //Abtin: +1 is to prevent docile get zero.
+	int c = 0, Decile = int(AllE / 100) + 1; //Me: +1 is to prevent docile get zero.
 	for (TEdgeI EI = BegEI(); EI < EndEI(); EI++) {
 		TSnap::GetCmnNbrs(ThisPt, EI.GetSrcNId(), EI.GetDstNId(), NbrV);
 		for (int n = 0; n < NbrV.Len(); n++) {
@@ -872,14 +872,14 @@ void TCtmsNet::CountSignedTriads2(const TStr& OutFNm) const {
 	}
 	const double PlusProb = AllPlusE / AllE;
 	int SigTriadsClasPresent = 0, UnSigTriadsClasPresent = 0;
-	//Abtin: Each Triad is counted according to the number of edges present in it
+	//Me: Each Triad is counted according to the number of edges present in it
 	for (int t = 0; t < SigEqClasses.Len(); t++) {
 		const int E = SigEqClasses[t].Val1->GetEdges();
 		SigEqClasses[t].Val2 /= E;
 		AllTriadsCnt += SigEqClasses[t].Val2;
 		if (SigEqClasses[t].Val2 != 0) { SigTriadsClasPresent++; }
 	}
-	//Abtin: Each Triad is counted according to the number of edges present in it
+	//Me: Each Triad is counted according to the number of edges present in it
 	for (int u = 0; u < UnSigEqClasses.Len(); u++) {
 		const int E = UnSigEqClasses[u].Val1->GetEdges();
 		UnSigEqClasses[u].Val2 /= E;

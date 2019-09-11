@@ -11,7 +11,7 @@ typedef TPair<TIntV, TIntV> TIntVPr;
 typedef THash<TChA, TPair<PCtmsNet, int>> TTriadEqClasH;
 
 /////////////////////////////////////////////////
-// Extended version of Signed network
+// augmented/modified version of signnet with different types of triad equivalnce classes
 class TCtmsNet : public TSignNet {
 public:
 	TCtmsNet() { }

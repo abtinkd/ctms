@@ -91,9 +91,9 @@ private:
 	void CreateFeatureV(const bool Signed = true, const bool BiDirEdgeSide = true);
 	// Lescovek features
 	void CreateFeatureVPp();
-	// Abtin: Get all edges' corresponding triads with parameters: sign and birdirection
+	// Me: Get all edges' corresponding triads with parameters: sign and birdirection
 	void ExtractDataSet(const bool Signed = true, const bool BiDirEdgeSide = true);
-	// Lescovek features
+	// features used in "Predicting positive and negative links in online social networks"
 	void ExtractDataSetPp();
 	void ScaleFeature();
 	void SaveTheta(const TStr& Suffx = TStr());
