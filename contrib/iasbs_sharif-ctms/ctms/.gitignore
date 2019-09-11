@@ -1,7 +1,9 @@
 ctms.vcxproj.user
 .vs/
 results/*
+data/*
 Debug/
 
 #keep these files
 !results/.gitkeep
+!data/testnet.txt
