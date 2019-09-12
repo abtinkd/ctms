@@ -6,8 +6,8 @@ all: MakeAll
 
 MakeAll:
 	$(MAKE) -C ctms
-	$(MAKE) -C convert_wikipedia
+	$(MAKE) -C converter
 
 clean:	
 	$(MAKE) clean -C ctms
-	$(MAKE) clean -C convert_wikipedia
+	$(MAKE) clean -C converter

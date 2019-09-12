@@ -14,14 +14,14 @@ This project is providing 8 sign prediction methods that are used in [\[1\]](#ac
 
 ## Compiling CTMS
 
-In order to compile the source codes and build `convert_wikipedia`
+In order to compile the source codes and build `convertmain`
 and `ctmsmain`, use following commands:
 ```
 ~/snap/contrib/iasbs_sharif-ctms$ make all
 ```
 or build them separately:
 ```
-~/snap/contrib/iasbs_sharif-ctms/convert_wikipedia$ make
+~/snap/contrib/iasbs_sharif-ctms/converter$ make
 ~/snap/contrib/iasbs_sharif-ctms/ctms$ make
 ```
 
@@ -32,7 +32,7 @@ or build them separately:
 - `sign_prediction` has the implementations for sign prediction methods.
 - `ml` has the implementations for logistic regression optimizer.
 
-### [convert_wikipedia](convert_wikipedia)
+### [converter](converter)
 
 - `convertmain` and `convert_wikipedia` are used to convert wikipedia file format.
 
