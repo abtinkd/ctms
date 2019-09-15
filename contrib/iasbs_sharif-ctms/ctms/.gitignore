@@ -1,8 +1,8 @@
-ctms.vcxproj.user
 .vs/
 results/*
 data/*
 Debug/
+Release/
 
 #keep these files
 !results/.gitkeep
