@@ -186,6 +186,7 @@ void runSignPredictionMethods(const PCtmsNet& Network, TIntTrV& Edges, const TSt
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
 		cout << "Missing arguments for the main function. Instructions are in README file." << endl;
+		return 1;
 	}
 
 	if (strcmp(argv[1], "EQC") == 0) {
