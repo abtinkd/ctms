@@ -1,0 +1,13 @@
+*/.vs/
+*/results/*
+*/data/*
+*/Debug/
+*/x64/
+*/Release/
+*/out/
+*.VC.opendb
+*.VC.db
+
+#keep these files
+!results/.gitkeep
+!data/testnet.txt

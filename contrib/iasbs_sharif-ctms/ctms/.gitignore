@@ -1,9 +1,0 @@
-.vs/
-results/*
-data/*
-Debug/
-Release/
-
-#keep these files
-!results/.gitkeep
-!data/testnet.txt
