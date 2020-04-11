@@ -45,7 +45,7 @@ void GetMaskEdges(const PCtmsNet& OrigNet, TIntTrV& outputEdges, const int MinEm
 }
 
 int main(int argc, char* argv[]) {
-	if (argc < 3) {
+	if (argc < 4) {
 		cout << "missing arguments:" << endl;
 		cout << "arg1 -- source file path" << endl;
 		cout << "arg2 -- output file path" << endl;
