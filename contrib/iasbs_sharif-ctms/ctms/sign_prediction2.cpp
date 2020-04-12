@@ -28,7 +28,13 @@ void TCTMSProbabilisticInference::build() {
 
 }
 
-int TNaivePredictor::predict(const TInt srcNId, const TInt desNId) {
+int TNaivePredictor::predict(const TInt srcNId, const TInt desNId) {	
+	if (pType == "gnr"){}
+	else if (pType == "rcp") {}
+	else if (pType == "cmp") {}
+	else if (pType == "wgr") {}
+	else {// to do random
+	}
 	return 1;
 }
 

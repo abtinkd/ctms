@@ -15,8 +15,10 @@ public:
 };
 
 class TNaivePredictor : public TSignPredictor {
+protected:
+	const char* pType;
 public:
-	TNaivePredictor(const PCtmsNet& net) : TSignPredictor(net) {}
+	TNaivePredictor(const PCtmsNet& net, const char* type) : TSignPredictor(net), pType(type) {}
 	void build();
 	int predict(const TInt srcNId, const TInt desNId);
 };
