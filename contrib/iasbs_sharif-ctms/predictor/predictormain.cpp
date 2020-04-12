@@ -29,47 +29,62 @@ void LoadEdges(TIntPrV& edges, const char* edgesFilePath) {
 int main(int argc, char* argv[]) {
 	if (argc < 5) {
 		cout << "missing arguments:" << endl;
-		cout << "arg1 -- algorithm: NAIVE(1) BALANCE(2) STATUS(3) LogReg(4) CTMS(5)" << endl;
+		cout << "arg1 -- algorithm:" << endl <<
+			"   1 <-- generative-based" << endl <<
+			"   2 <-- receptive-based" << endl <<
+			"   3 <-- compound-based" << endl <<
+			"   4 <-- weighted generative receptive combination" << endl <<
+			"   5 <-- heuristic balance" << endl <<
+			"   6 <-- heuristic status" << endl <<
+			"   7 <-- logistic regression" << endl <<
+			"   8 <-- closed triple micro-structures" << endl;
 		cout << "arg2 -- input network file path" << endl;
 		cout << "arg3 -- input unsigned edges file path" << endl;
-		cout << "arg4 -- output predicted edges file path" << endl;		
+		cout << "arg4 -- output file-name" << endl;		
 		return 1;
 	}
 
 	const int alg = atoi(argv[1]);
-	const char* networkFilePath = argv[2];
-	const char* edgesFilePath = argv[3];
-	const char* outputFilePath = argv[4];
+	const string networkFilePath = argv[2];
+	const string edgesFilePath = argv[3];
+	string outputFilePath = argv[4];
 
 	cout << "network file: " << networkFilePath << endl;
 	cout << "unsigned edges file: " << edgesFilePath << endl;
 	cout << "loading network ..." << endl;
-	PCtmsNet network = TCtmsNet::LoadSignedNet(networkFilePath);
+	PCtmsNet network = TCtmsNet::LoadSignedNet(networkFilePath.data());
 	cout << "loading edges ..." << endl;
 	TIntPrV edges;
-	LoadEdges(edges, edgesFilePath);
+	LoadEdges(edges, edgesFilePath.data());
 	
-	TChA algorithm;
+	string algorithm;
 	TSignPredictor* predictor;
 	switch (alg) {
-	case 1: algorithm = "naive"; 
-		predictor = new TNaivePredictor(network); break;
-	case 2: algorithm = "balance";
+	case 1: algorithm = "gnr"; 
+	case 2: algorithm = "rcp";
+	case 3: algorithm = "cmp";
+	case 4: algorithm = "wgr";
+		predictor = new TNaivePredictor(network, algorithm.data()); break;
+	case 5: algorithm = "balance";
 		predictor = new TBalanceBasedPredictor(network); break;
-	case 3: algorithm = "status";
+	case 6: algorithm = "status";
 		predictor = new TStatusBasedPredictor(network); break;	
-	case 4: algorithm = "logreg"; 
+	case 7: algorithm = "logreg"; 
 		predictor = new TLogisticRegression(network); break;
-	case 5: algorithm = "ctms";
+	case 8: algorithm = "ctms";
 		predictor = new TCTMSProbabilisticInference(network); break;
 	default:
-		predictor = new TNaivePredictor(network);
+		predictor = new TNaivePredictor(network, "rnd");
 	}
-	cout << "building model using \'" << algorithm.CStr() << "\' algorithm..." << endl;
+	cout << "building model using \'" << algorithm << "\' algorithm..." << endl;
 	predictor->build();	
 
+	outputFilePath = "out/" + algorithm + "_" + outputFilePath;
+	cout << "saving predictions in " << outputFilePath << endl;
+	
 	ofstream outputFile;
 	outputFile.open(outputFilePath);
+	outputFile << "# prediction results for: " << algorithm << endl;
 	outputFile << "# network file: " << networkFilePath << endl;
 	outputFile << "# edges file: " << edgesFilePath << endl;
 	outputFile << "# FromNodeId ToNodeId	Sign" << endl;
