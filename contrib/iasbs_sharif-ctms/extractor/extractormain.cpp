@@ -88,9 +88,9 @@ int main(int argc, char* argv[]) {
 		maskE[i].GetVal3() == 1 ? ++pos : 1;
 	}
 	
-	const string outputFilePathNet = "out/rest_" + outputFileName;
-	const string outputFilePathEdg = "out/mask_" + outputFileName;
-	const string outputFilePathUsg = "out/mask_nosign_" + outputFileName;
+	const string outputFilePathNet = "out/train_" + outputFileName;
+	const string outputFilePathEdg = "out/test_lables_" + outputFileName;
+	const string outputFilePathUsg = "out/test_" + outputFileName;
 	cout << "saving ..." << endl;
 	cout << outputFilePathNet << endl;
 	cout << outputFilePathEdg << endl;
