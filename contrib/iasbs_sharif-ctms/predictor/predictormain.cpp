@@ -60,9 +60,12 @@ int main(int argc, char* argv[]) {
 	string algorithm;
 	TSignPredictor* predictor;
 	switch (alg) {
-	case 1: algorithm = "gnr"; 
+	case 1: algorithm = "gnr";
+		predictor = new TNaivePredictor(network, algorithm.data()); break;
 	case 2: algorithm = "rcp";
+		predictor = new TNaivePredictor(network, algorithm.data()); break;
 	case 3: algorithm = "cmp";
+		predictor = new TNaivePredictor(network, algorithm.data()); break;
 	case 4: algorithm = "wgr";
 		predictor = new TNaivePredictor(network, algorithm.data()); break;
 	case 5: algorithm = "balance";
@@ -89,6 +92,8 @@ int main(int argc, char* argv[]) {
 	outputFile << "# edges file: " << edgesFilePath << endl;
 	outputFile << "# FromNodeId ToNodeId	Sign" << endl;
 	for (int i = 0; i < edges.Len(); i++) {
+		if (!network->IsNode(edges[i].Val1)) continue;
+		if (!network->IsNode(edges[i].Val2)) continue;
 		const int sign = predictor->predict(edges[i].Val1, edges[i].Val2);
 		outputFile << edges[i].Val1 << "\t" << edges[i].Val2 << "\t" << sign << endl;
 	}
