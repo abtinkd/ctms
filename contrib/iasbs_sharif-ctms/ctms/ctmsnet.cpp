@@ -37,7 +37,7 @@ PCtmsNet TCtmsNet::GetBalSgnProbSubNet() {
 }
 
 // Returns a new sub-network with minimum Embeddedness of MinEmValue
-PCtmsNet TCtmsNet::GetMinEmbeddedSubNet(const int MinEmValue) {
+PCtmsNet TCtmsNet::GetMinEmbeddedSubNet(const int MinEmValue, const bool enforceEmOnSubnet) {
 	PCtmsNet thisNet = PCtmsNet(this);
 	PCtmsNet NewNet = TCtmsNet::New();
 	int addE = 0, totE = 0;
@@ -50,21 +50,23 @@ PCtmsNet TCtmsNet::GetMinEmbeddedSubNet(const int MinEmValue) {
 		if (!NewNet->IsNode(EI.GetDstNId())) { NewNet->AddNode(EI.GetDstNId()); }
 		NewNet->AddEdge(EI);
 		addE++;
-	}
-	int delE = 0, i = 0;
-	bool chg;
-	do {
-		chg = false; i++;
-		for (TSignNet::TEdgeI EI = NewNet->BegEI(); EI < NewNet->EndEI(); EI++) {
-			TIntV NbV;
-			TSnap::GetCmnNbrs(NewNet, EI.GetSrcNId(), EI.GetDstNId(), NbV);
-			if (NbV.Len() >= MinEmValue) { continue; }
-			NewNet->DelEdge(EI.GetSrcNId(), EI.GetDstNId());
-			delE++;
-			chg = true;
-		}
-	} while (chg == true);
-	printf("\nTotal Edges:%d Deleted:%d Left:%d\n", totE, (totE - (addE - delE)), (addE - delE));
+	}	
+	if (enforceEmOnSubnet) {
+		int delE = 0;
+		bool chg;
+		do {
+			chg = false;
+			for (TSignNet::TEdgeI EI = NewNet->BegEI(); EI < NewNet->EndEI(); EI++) {
+				TIntV NbV;
+				TSnap::GetCmnNbrs(NewNet, EI.GetSrcNId(), EI.GetDstNId(), NbV);
+				if (NbV.Len() >= MinEmValue) { continue; }
+				NewNet->DelEdge(EI.GetSrcNId(), EI.GetDstNId());
+				delE++;
+				chg = true;
+			}
+		} while (chg == true);
+		printf("\nTotal Edges:%d Deleted:%d Left:%d\n", totE, (totE - (addE - delE)), (addE - delE));
+	}		
 	return NewNet;
 }
 

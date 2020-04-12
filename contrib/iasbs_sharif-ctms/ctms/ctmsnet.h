@@ -45,7 +45,7 @@ public:
 	static PCtmsNet LoadSignedNet(const TStr& InFNm, const int& SrcColId = 0, const int& DstColId = 1, const int& SignColId = 2);
 	PCtmsNet CopyNet() const;
 	PCtmsNet GetBalSgnProbSubNet();
-	PCtmsNet GetMinEmbeddedSubNet(const int MinEmValue);
+	PCtmsNet GetMinEmbeddedSubNet(const int MinEmValue, const bool enforceEmOnSubnet=false);
 	bool operator==(const TCtmsNet& SgnNet) const;
 	bool operator!=(const TCtmsNet& SgnNet) const;	
 	PCtmsNet GenRewire(const int& NSwitch, TRnd Rnd = TRnd()) const;
