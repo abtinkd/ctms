@@ -1,6 +1,7 @@
 ## Main application file
 MAIN = extractormain
 CXXFLAGS += -std=c++11
-DEPH = ../$(EXSNAPEXP)/signnet.h ../cmts/ctmsnet.h
+LDFLAGS += -I../ctms
+DEPH = ../$(EXSNAPEXP)/signnet.h ../ctms/ctmsnet.h
 DEPCPP = ../$(EXSNAPEXP)/signnet.cpp ../ctms/ctmsnet.cpp
 
