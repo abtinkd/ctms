@@ -4,10 +4,11 @@
 */Debug/
 */x64/
 */Release/
-*/out/
+*/out/*
 *.VC.opendb
 *.VC.db
 
 #keep these files
-!results/.gitkeep
+!*/results/.gitkeep
+!*/out/.gitkeep
 !data/testnet.txt
