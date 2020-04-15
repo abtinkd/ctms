@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	const string outputFilePathNet = "out/train_" + outputFileName;
-	const string outputFilePathEdg = "out/test_lables_" + outputFileName;
+	const string outputFilePathEdg = "out/lables_" + outputFileName;
 	const string outputFilePathUsg = "out/test_" + outputFileName;
 	cout << "saving ..." << endl;
 	cout << outputFilePathNet << endl;

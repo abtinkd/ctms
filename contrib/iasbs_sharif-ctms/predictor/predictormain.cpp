@@ -38,9 +38,9 @@ int main(int argc, char* argv[]) {
 			"   6 <-- heuristic status" << endl <<
 			"   7 <-- logistic regression" << endl <<
 			"   8 <-- closed triple micro-structures" << endl;
-		cout << "arg2 -- input network file path" << endl;
-		cout << "arg3 -- input unsigned edges file path" << endl;
-		cout << "arg4 -- output file-name" << endl;		
+		cout << "arg2 -- train file path" << endl;
+		cout << "arg3 -- test file path" << endl;
+		cout << "arg4 -- predictions file name" << endl;		
 		return 1;
 	}
 
@@ -49,8 +49,8 @@ int main(int argc, char* argv[]) {
 	const string edgesFilePath = argv[3];
 	string outputFilePath = argv[4];
 
-	cout << "network file: " << networkFilePath << endl;
-	cout << "unsigned edges file: " << edgesFilePath << endl;
+	cout << "train file: " << networkFilePath << endl;
+	cout << "test file: " << edgesFilePath << endl;
 	cout << "loading network ..." << endl;
 	PCtmsNet network = TCtmsNet::LoadSignedNet(networkFilePath.data());
 	cout << "loading edges ..." << endl;

@@ -25,8 +25,8 @@ void read(const char* filePath, unordered_map<string, int>& listing) {
 int main(int argc, char* argv[]) {
 	if (argc < 3) {
 		cout << "missing arguments:" << endl;
-		cout << "arg1 -- actual signs file" << endl;
-		cout << "arg2 -- predictions file" << endl;
+		cout << "arg1 -- true lables file path" << endl;
+		cout << "arg2 -- prediction file path" << endl;
 		return 1;
 	}
 
@@ -69,6 +69,5 @@ int main(int argc, char* argv[]) {
 	const double tnr = 1.0 * tn / (tn + fp);
 	cout << "TNR: " << tnr << endl;
 	cout << "Acc: " << 1.0 * (tp + tn) / (tp + tn + fp + fn) << endl;
-	cout << "Ac2: " << (tpr + tnr) / 2.0 << endl;
-	getchar();
+	cout << "Ac2: " << (tpr + tnr) / 2.0 << endl;	
 }
