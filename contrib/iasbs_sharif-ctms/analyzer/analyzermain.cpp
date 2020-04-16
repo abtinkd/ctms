@@ -57,10 +57,10 @@ int main(int argc, char* argv[]) {
 		}
 		else unknown++;
 	}
-	cout << "true positive: " << tp << endl;
-	cout << "true negative: " << tn << endl;
-	cout << "false positive: " << fp << endl;
-	cout << "false negative: " << fn << endl;
+	cout << "TP: " << tp << endl;
+	cout << "TN: " << tn << endl;
+	cout << "FP: " << fp << endl;
+	cout << "FN: " << fn << endl;
 	cout << "missing: " << missing << endl;
 	cout << "unknown: " << unknown << endl;
 	cout << "----------------------" << endl;
@@ -68,6 +68,6 @@ int main(int argc, char* argv[]) {
 	cout << "TPR: " << tpr << endl;
 	const double tnr = 1.0 * tn / (tn + fp);
 	cout << "TNR: " << tnr << endl;
-	cout << "Acc: " << 1.0 * (tp + tn) / (tp + tn + fp + fn) << endl;
-	cout << "Ac2: " << (tpr + tnr) / 2.0 << endl;	
+	cout << "Accuracy: " << 1.0 * (tp + tn) / (tp + tn + fp + fn) << endl;
+	cout << "Mean(TPR, TNR): " << (tpr + tnr) / 2.0 << endl;	
 }
