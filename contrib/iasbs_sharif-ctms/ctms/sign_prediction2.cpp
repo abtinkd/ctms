@@ -86,6 +86,10 @@ void TCTMSProbabilisticInference::build() {
 	return;
 }
 
+void TCTMSProbabilisticInferenceLocal::build() {
+	return;
+}
+
 int TNaivePredictor::predict(const TInt srcNId, const TInt desNId) {
 	int sign;
 	const TSignNet::TNodeI SrcNI = network->GetNI(srcNId);
@@ -162,6 +166,89 @@ int TCTMSProbabilisticInference::predict(const TInt srcNId, const TInt desNId) {
 	return posTrend >= negTrend ? 1 : -1;
 }
 
+int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desNId) {
+	if (!network->IsNode(srcNId) || !network->IsNode(desNId))
+		return 0;
+	
+	// calculating theta based on local data
+	TIntPrV edges;
+	const TSignNet::TNodeI SrcNI = network->GetNI(srcNId);
+	const TSignNet::TNodeI DesNI = network->GetNI(desNId);
+	for (int i = 0; i < SrcNI.GetOutDeg(); i++)
+		edges.Add(TIntPr(SrcNI.GetId(), SrcNI.GetOutNId(i)));
+	for (int i = 0; i < DesNI.GetOutDeg(); i++)
+		edges.Add(TIntPr(DesNI.GetId(), DesNI.GetOutNId(i)));
+	for (int i = 0; i < SrcNI.GetInDeg(); i++)
+		edges.Add(TIntPr(SrcNI.GetInNId(i), SrcNI.GetId()));
+	for (int i = 0; i < DesNI.GetInDeg(); i++)
+		edges.Add(TIntPr(DesNI.GetInNId(i), DesNI.GetId()));
+
+	static TTriadEqClasH fe;
+	if (fe.Empty())
+		TCtmsNet::GenTriadEquivClasses(fe);	
+	THash<TChA, TInt> actualCTMSsCnt, CTMSsIfPos, CTMSsIfNeg;
+	THash<TChA, TFlt> theta;
+	theta.AddDat("theta0", 0.0);
+	for (int c = 0; c < fe.Len(); c++) { //id <- c+1, triad string <- fe.GetKey(c)
+		const TChA feaStr = fe.GetKey(c);
+		theta.AddDat(feaStr, 0.0);
+		actualCTMSsCnt.AddDat(feaStr, 0);
+		CTMSsIfPos.AddDat(feaStr, 0);
+		CTMSsIfNeg.AddDat(feaStr, 0);
+	}	
+	int PosEListSize = 0, AllTriadsCnt = 0;
+	for (int i = 0; i < edges.Len(); i++) {
+		const TIntPr edge(edges[i].Val1, edges[i].Val2);
+		const TInt sign = network->GetEDat(edge.Val1, edge.Val2);
+		if (sign == +1) PosEListSize++;
+		for (int i = 0; i < 3; i++) {
+			if (i == 1)
+				network->SetEDat(edge.Val1, edge.Val2, +1);
+			else if (i == 2)
+				network->SetEDat(edge.Val1, edge.Val2, -1);
+			THash<TChA, TInt> feaValues;
+			extractFeatures(edge, feaValues);
+			for (THashKeyDatI<TChA, TInt> fv = feaValues.BegI(); fv < feaValues.EndI(); fv++) {
+				if (i == 0) {
+					AllTriadsCnt += fv.GetDat();
+					actualCTMSsCnt(fv.GetKey()) += fv.GetDat();
+				}
+				else if (i == 1)
+					CTMSsIfPos(fv.GetKey()) += fv.GetDat();
+				else if (i == 2)
+					CTMSsIfNeg(fv.GetKey()) += fv.GetDat();
+			}
+			network->SetEDat(edge.Val1, edge.Val2, sign);
+		}		
+	}
+	double p0 = PosEListSize / (double)edges.Len();
+	for (int t = 0; t < theta.Len(); t++) {
+		const TChA feaStr = theta.GetKey(t);
+		const double ExpCnt = 1 + p0 * CTMSsIfPos(feaStr) + (1 - p0) * CTMSsIfNeg(feaStr);
+		const double TriadProb = ExpCnt / (double)AllTriadsCnt;
+		const double Surp = (actualCTMSsCnt(feaStr) - ExpCnt) / sqrt(AllTriadsCnt*TriadProb*(1.0 - TriadProb));
+		theta[t] = Surp;
+	}
+	normalize(theta);
+	// end of calculation
+
+	const TIntPr edge(srcNId, desNId);
+	network->AddEdge(srcNId, desNId, +1);
+	THash<TChA, TInt> fvIfPositive;
+	extractFeatures(edge, fvIfPositive);
+	network->SetEDat(srcNId, desNId, -1);
+	THash<TChA, TInt> fvIfNegative;
+	extractFeatures(edge, fvIfNegative);
+	network->DelEdge(srcNId, desNId);
+
+	double posTrend = theta.GetDat("theta0"), negTrend = theta.GetDat("theta0");
+	for (THashKeyDatI<TChA, TInt> fv = fvIfPositive.BegI(); fv < fvIfPositive.EndI(); fv++)
+		posTrend += theta.GetDat(fv.GetKey()) * fv.GetDat();
+	for (THashKeyDatI<TChA, TInt> fv = fvIfNegative.BegI(); fv < fvIfNegative.EndI(); fv++)
+		negTrend += theta.GetDat(fv.GetKey()) * fv.GetDat();
+	return posTrend >= negTrend ? 1 : -1;
+}
+
 void::TLogisticRegression::extractFeatures() {
 
 }
@@ -175,6 +262,19 @@ void TCTMSProbabilisticInference::extractFeatures(const TIntPr& edge,
 		const TChA TriStr = TCtmsNet::GetTriadStr(ctms, 0, 1, 2);
 		edgeFeaValues.IsKey(TriStr) ? 
 			edgeFeaValues(TriStr)++ : 
+			edgeFeaValues.AddDat(TriStr, 1);
+	}
+}
+
+void TCTMSProbabilisticInferenceLocal::extractFeatures(const TIntPr& edge,
+	THash<TChA, TInt>& edgeFeaValues) {
+	TIntV NbrsV;
+	TSnap::GetCmnNbrs(network, edge.Val1, edge.Val2, NbrsV);
+	for (int n = 0; n < NbrsV.Len(); n++) {
+		PCtmsNet ctms = network->GetTriad(edge.Val1, edge.Val2, NbrsV[n]);
+		const TChA TriStr = TCtmsNet::GetTriadStr(ctms, 0, 1, 2);
+		edgeFeaValues.IsKey(TriStr) ?
+			edgeFeaValues(TriStr)++ :
 			edgeFeaValues.AddDat(TriStr, 1);
 	}
 }

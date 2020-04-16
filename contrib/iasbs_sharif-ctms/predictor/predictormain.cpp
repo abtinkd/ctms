@@ -30,14 +30,15 @@ int main(int argc, char* argv[]) {
 	if (argc < 5) {
 		cout << "missing arguments:" << endl;
 		cout << "arg1 -- algorithm:" << endl <<
-			"   1 <-- generative-based" << endl <<
-			"   2 <-- receptive-based" << endl <<
-			"   3 <-- compound-based" << endl <<
-			"   4 <-- weighted generative receptive combination" << endl <<
-			"   5 <-- heuristic balance" << endl <<
-			"   6 <-- heuristic status" << endl <<
-			"   7 <-- logistic regression" << endl <<
-			"   8 <-- closed triple micro-structures" << endl;
+			"   1 <- generative-based" << endl <<
+			"   2 <- receptive-based" << endl <<
+			"   3 <- compound-based" << endl <<
+			"   4 <- weighted generative receptive combination" << endl <<
+			"   5 <- heuristic balance" << endl <<
+			"   6 <- heuristic status" << endl <<
+			"   7 <- logistic regression" << endl <<
+			"   8 <- CTMS" << endl <<
+			"   9 <- Local CTMS (not included in the paper)" << endl;
 		cout << "arg2 -- train file path" << endl;
 		cout << "arg3 -- test file path" << endl;
 		cout << "arg4 -- predictions file name" << endl;		
@@ -76,6 +77,8 @@ int main(int argc, char* argv[]) {
 		predictor = new TLogisticRegression(network); break;
 	case 8: algorithm = "ctms";
 		predictor = new TCTMSProbabilisticInference(network); break;
+	case 9: algorithm = "localctms";
+		predictor = new TCTMSProbabilisticInferenceLocal(network); break;
 	default:
 		predictor = new TNaivePredictor(network, "rnd");
 	}

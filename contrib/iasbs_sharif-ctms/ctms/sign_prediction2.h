@@ -56,4 +56,14 @@ public:
 	void build();
 	int predict(const TInt srcNId, const TInt desNId);
 };
+
+class TCTMSProbabilisticInferenceLocal : public TSignPredictor {
+	// Not included in the paper
+protected:	
+	void extractFeatures(const TIntPr& edge, THash<TChA, TInt>& edgeFeaValues);
+public:
+	TCTMSProbabilisticInferenceLocal(const PCtmsNet& net) : TSignPredictor(net) {}
+	void build();
+	int predict(const TInt srcNId, const TInt desNId);
+};
 #endif // !SIGN_PREDICTION2_H
