@@ -47,6 +47,7 @@ void TCTMSProbabilisticInference::build() {
 		CTMSsIfPos.AddDat(feaStr, 0);
 		CTMSsIfNeg.AddDat(feaStr, 0);
 	}
+	int c = 0, ECnt = (network->GetEdges() / 100) + 1;
 	int PosEListSize = 0, AllTriadsCnt = 0;
 	for (TSignNet::TEdgeI EI = network->BegEI(); EI < network->EndEI(); EI++) {
 		const TIntPr edge(EI.GetSrcNId(), EI.GetDstNId());
@@ -71,6 +72,7 @@ void TCTMSProbabilisticInference::build() {
 			}
 			network->SetEDat(EI.GetSrcNId(), EI.GetDstNId(), sign);
 		}
+		if (c++%ECnt == 0) { printf("\r%d%%", c / ECnt); }
 	}
 	double p0 = PosEListSize / (double)network->GetEdges();
 	for (int t = 0; t < theta.Len(); t++) {

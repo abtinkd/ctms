@@ -117,10 +117,10 @@ int main(int argc, char* argv[]) {
 	outputFileUsg << "# is balanced? " << (isBalanced ? 'Y' : 'N') << endl;
 	outputFileEdg << "# sampling rate: " << sampleFraction << endl;
 	outputFileUsg << "# sampling rate: " << sampleFraction << endl;
-	outputFileEdg << "# edge count: " << subnetEcount << "/" << sourceEcount << endl;
-	outputFileUsg << "# edge count: " << subnetEcount << "/" << sourceEcount << endl;
-	outputFileEdg << "# positive edge count: " << pos << endl;
-	outputFileUsg << "# positive edge count: " << pos << endl;
+	outputFileEdg << "# edge count: " << subnetEcount << endl;
+	outputFileUsg << "# edge count: " << subnetEcount << endl;
+	outputFileEdg << "# positive edge ratio: " << 1.0 * pos / subnetEcount << endl;
+	outputFileUsg << "# positive edge ratio: " << 1.0 * pos / subnetEcount << endl;
 	outputFileEdg << "# FromNodeId ToNodeId	Sign" << endl;
 	outputFileUsg << "# FromNodeId ToNodeId" << endl;
 	
