@@ -51,8 +51,7 @@ void TCTMSProbabilisticInference::build() {
 	for (TSignNet::TEdgeI EI = network->BegEI(); EI < network->EndEI(); EI++) {
 		for (int i = 0; i < 3; i++) {
 			const TIntPr edge(EI.GetSrcNId(), EI.GetDstNId());
-			const TInt sign = EI.GetDat();
-			if (sign == 1) PosEListSize++;
+			const TInt sign = EI.GetDat();			
 			if (i == 1)
 				network->SetEDat(EI.GetSrcNId(), EI.GetDstNId(), +1);
 			else if (i == 2)
@@ -63,6 +62,7 @@ void TCTMSProbabilisticInference::build() {
 				if (i == 0) {
 					AllTriadsCnt += fv.GetDat();
 					actualCTMSsCnt(fv.GetKey()) += fv.GetDat();
+					if (sign == +1) PosEListSize++;
 				}
 				else if (i == 1)
 					CTMSsIfPos(fv.GetKey()) += fv.GetDat();
