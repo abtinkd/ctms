@@ -49,8 +49,8 @@ public:
 
 class TCTMSProbabilisticInference : public TSignPredictor {
 protected:
-	THashSet<TChA> features; //TChA is feature string. Its corresponding Int ID is hash KeyId (int KeyId -> TChA Feature String)
-	void extractFeatures();
+	THash<TChA, TFlt> theta;
+	void extractFeatures(const TIntPr& edge, THash<TChA, TInt>& edgeFeaValues);
 public:
 	TCTMSProbabilisticInference(const PCtmsNet& net) : TSignPredictor(net) {}
 	void build();
