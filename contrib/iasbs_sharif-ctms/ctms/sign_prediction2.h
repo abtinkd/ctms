@@ -39,10 +39,14 @@ public:
 
 class TLogisticRegression : public TSignPredictor {
 protected:
-	THashSet<TChA> features; //TChA is feature string. Its corresponding Int ID is hash KeyId (int KeyId -> TChA Feature String)
-	void extractFeatures();
+	//THashSet<TChA> features; //TChA is feature string. Its corresponding Int ID is hash KeyId (int KeyId -> TChA Feature String)
+	TFltV theta;
+	THash<TChA, TInt> fe2ix;
+	THash<TInt, TChA> ix2fe;
+	void extractFeatures(const TIntPr& edge, THash<TChA, TInt>& edgeFeaValues);
+	void mapFeature2Index();
 public:
-	TLogisticRegression(const PCtmsNet& net) : TSignPredictor(net) {}
+	TLogisticRegression(const PCtmsNet& net) : TSignPredictor(net) { mapFeature2Index(); }
 	void build();
 	int predict(const TInt srcNId, const TInt desNId);
 };

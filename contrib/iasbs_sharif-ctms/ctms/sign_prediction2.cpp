@@ -31,8 +31,54 @@ void TStatusBasedPredictor::build() {
 
 }
 
-void TLogisticRegression::build() {
+void TLogisticRegression::mapFeature2Index() {
+	const TStr ES[] = { "F", "B" }, SS[] = { "p", "n" };
+	TInt index = 0;
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < 2; j++) {
+			for (int k = 0; k < 2; k++) {
+				for (int l = 0; l < 2; l++) {
+					const TStr feature = ES[i] + ES[j] + SS[k] + SS[l];
+					fe2ix.AddKey(feature);
+					fe2ix.AddDat(feature, index);
+					ix2fe.AddKey(index);
+					ix2fe.AddDat(index, feature);
+					index++;
+				}
+			}
+		}
+	}
+	return;
+}
 
+void TLogisticRegression::build() {
+	TVec<TFltV> XV;
+	TFltV YV;	
+	int c = 0, ECnt = (network->GetEdges() / 100) + 1;	
+	for (TSignNet::TEdgeI EI = network->BegEI(); EI < network->EndEI(); EI++) {
+		const TIntPr edge(EI.GetSrcNId(), EI.GetDstNId());
+		THash<TChA, TInt> edgeFeaValues;
+		extractFeatures(edge, edgeFeaValues);
+		TFltV values = TFltV(fe2ix.Len()); values.PutAll(0.0);
+		for (int i = 0; i < edgeFeaValues.Len(); i++) {			
+			const TChA feature = edgeFeaValues.GetKey(i);
+			values[fe2ix.GetDat(feature)] = edgeFeaValues.GetDat(feature);
+		}
+		XV.Add(values);
+		const int sign = network->GetEDat(edge.Val1, edge.Val2);
+		YV.Add((sign == 1) ? 1.0 : -1.0);
+		if (c++%ECnt == 0) {printf("\r%d%%", c / ECnt);}
+	}
+
+	//printf("Fitting Prediction Model...");	
+	TLogRegFit LRFit;
+	PLogRegPredict LRModel = LRFit.CalcLogRegNewton(XV, YV);
+	//printf(" COMPLETED\n");
+
+	TFltV theta;
+	LRModel->GetTheta(theta);
+	// normalize(theta);
+	return;
 }
 
 void TCTMSProbabilisticInference::build() {	
@@ -143,7 +189,21 @@ int TStatusBasedPredictor::predict(const TInt srcNId, const TInt desNId) {
 }
 
 int TLogisticRegression::predict(const TInt srcNId, const TInt desNId) {
-	return 1;
+	if (!network->IsNode(srcNId) || !network->IsNode(desNId))
+		return 0;
+	const TIntPr edge(srcNId, desNId);
+	THash<TChA, TInt> edgeFeaValues;
+	extractFeatures(edge, edgeFeaValues);
+	TFltV values = TFltV(fe2ix.Len()); values.PutAll(0.0);
+	for (int i = 0; i < edgeFeaValues.Len(); i++) {
+		const TChA feature = edgeFeaValues.GetKey(i);
+		values[fe2ix.GetDat(feature)] = edgeFeaValues.GetDat(feature);
+	}
+	TVec<TFltV> X;
+	X.Add(values);
+	TFltV Result;
+	TLogRegPredict::GetCfy(X, Result, theta);
+	return (Result[0] <= 0.50000000) ? -1 : +1;
 }
 
 int TCTMSProbabilisticInference::predict(const TInt srcNId, const TInt desNId) {
@@ -249,8 +309,56 @@ int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desN
 	return posTrend >= negTrend ? 1 : -1;
 }
 
-void::TLogisticRegression::extractFeatures() {
-
+void TLogisticRegression::extractFeatures(const TIntPr& edge,
+	THash<TChA, TInt>& edgeFeaValues) {	
+	TIntV NbrsV;
+	TSnap::GetCmnNbrs(network, edge.Val1, edge.Val2, NbrsV);
+	for (int n = 0; n < NbrsV.Len(); n++) {
+		// ->-> Fwd[0]Fwd[1] <--> Bwd[0]Fwd[1] ...
+		bool Fwd[2] = { false, false }, Bwd[2] = { false, false };
+		bool FwdSgnP[2] = { false, false }, BwdSgnP[2] = { false, false };
+		if (network->IsEdge(edge.Val1, NbrsV[n])) {
+			Fwd[0] = true;
+			if (network->GetEDat(edge.Val1, NbrsV[n]) == 1) { FwdSgnP[0] = true; }
+		}
+		if (network->IsEdge(NbrsV[n], edge.Val1)) {
+			Bwd[0] = true;
+			if (network->GetEDat(NbrsV[n], edge.Val1) == 1) { BwdSgnP[0] = true; }
+		}
+		if (network->IsEdge(NbrsV[n], edge.Val2)) {
+			Fwd[1] = true;
+			if (network->GetEDat(NbrsV[n], edge.Val2) == 1) { FwdSgnP[1] = true; }
+		}
+		if (network->IsEdge(edge.Val2, NbrsV[n])) {
+			Bwd[1] = true;
+			if (network->GetEDat(edge.Val2, NbrsV[n]) == 1) { BwdSgnP[1] = true; }
+		}
+		TChA Feat;
+		if (Fwd[0] && Fwd[1]) {
+			Feat = "FF";
+			FwdSgnP[0] ? Feat += "p" : Feat += "n";
+			FwdSgnP[1] ? Feat += "p" : Feat += "n";
+		}
+		if (Fwd[0] && Bwd[1]) {
+			Feat = "FB";
+			FwdSgnP[0] ? Feat += "p" : Feat += "n";
+			BwdSgnP[1] ? Feat += "p" : Feat += "n";
+		}
+		if (Bwd[0] && Fwd[1]) {
+			Feat = "BF";
+			BwdSgnP[0] ? Feat += "p" : Feat += "n";
+			FwdSgnP[1] ? Feat += "p" : Feat += "n";
+		}
+		if (Bwd[0] && Bwd[1]) {
+			Feat = "BB";
+			BwdSgnP[0] ? Feat += "p" : Feat += "n";
+			BwdSgnP[1] ? Feat += "p" : Feat += "n";
+		}
+		edgeFeaValues.IsKey(Feat) ?
+			edgeFeaValues(Feat)++ :
+			edgeFeaValues.AddDat(Feat, 1);
+	}
+	return;
 }
 
 void TCTMSProbabilisticInference::extractFeatures(const TIntPr& edge, 
