@@ -181,7 +181,16 @@ int TNaivePredictor::predict(const TInt srcNId, const TInt desNId) {
 }
 
 int TBalanceBasedPredictor::predict(const TInt srcNId, const TInt desNId) {
-	return 1;
+	// ref: snap-exp\signnet.h > PredictBalance
+	TIntV NbrV;
+	TSnap::GetCmnNbrs(network, srcNId, desNId, NbrV);
+	int Bal = 0;
+	for (int n = 0; n < NbrV.Len(); n++) {		
+		const int E1 = network->IsEdge(srcNId, NbrV[n]) ? network->GetEDat(srcNId, NbrV[n]) : network->GetEDat(NbrV[n], srcNId);
+		const int E2 = network->IsEdge(desNId, NbrV[n]) ? network->GetEDat(desNId, NbrV[n]) : network->GetEDat(NbrV[n], desNId);
+		if (E1*E2 == 1) { Bal++; }
+	}
+	return (Bal >= NbrV.Len() / 2) ? +1 : -1;	
 }
 
 int TStatusBasedPredictor::predict(const TInt srcNId, const TInt desNId) {
