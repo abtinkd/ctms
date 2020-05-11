@@ -24,11 +24,11 @@ void TNaivePredictor::build() {
 }
 
 void TBalanceBasedPredictor::build() {
-
+	return;
 }
 
 void TStatusBasedPredictor::build() {
-
+	return;
 }
 
 void TLogisticRegression::mapFeature2Index() {
@@ -185,7 +185,17 @@ int TBalanceBasedPredictor::predict(const TInt srcNId, const TInt desNId) {
 }
 
 int TStatusBasedPredictor::predict(const TInt srcNId, const TInt desNId) {
-	return 1;
+	// ref: snap-exp\signnet.h > PredictStatus
+	TIntV NbrV;
+	TSnap::GetCmnNbrs(network, srcNId, desNId, NbrV);
+	double SrcS = 0, DstS = 0;
+	for (int n = 0; n < NbrV.Len(); n++) {
+		PSignNet Network = &*network;
+		PSignNet TriadNet = Network->GetTriad(srcNId, desNId, NbrV[n]); // (src,dst) == (0,1)
+		SrcS += TSignMicroEvol::GetStatus(TriadNet, 0) >= 0 ? 1 : -1;
+		DstS += TSignMicroEvol::GetStatus(TriadNet, 1) >= 0 ? 1 : -1;
+	}
+	return (SrcS > DstS) ? -1 : +1;	
 }
 
 int TLogisticRegression::predict(const TInt srcNId, const TInt desNId) {
