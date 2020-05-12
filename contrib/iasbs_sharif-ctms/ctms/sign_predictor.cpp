@@ -1,4 +1,4 @@
-#include "sign_prediction2.h"
+#include "sign_predictor.h"
 
 // Maps theta values to (-0.5, 0.5):	min -> -0.5		 max -> 0.5
 void normalize(THash<TChA, TFlt>& Th) {

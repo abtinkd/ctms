@@ -1,5 +1,5 @@
-#ifndef SIGN_PREDICTION2_H
-#define SIGN_PREDICTION2_H
+#ifndef SIGN_PREDICTOR_H
+#define SIGN_PREDICTOR_H
 
 #include "ctmsnet.h"
 #include <Snap.h>
