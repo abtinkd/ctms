@@ -20,14 +20,17 @@ void normalize(THash<TChA, TFlt>& Th) {
 }
 
 void TNaivePredictor::build() {
+	printf("Naive predictors are built.\n");
 	return;
 }
 
 void TBalanceBasedPredictor::build() {
+	printf("Balance-based predictor is built.\n");
 	return;
 }
 
 void TStatusBasedPredictor::build() {
+	printf("Status-based predictor is built.\n");
 	return;
 }
 
@@ -73,10 +76,10 @@ void TLogisticRegression::build() {
 	printf("\r%d%%\n", 100);
 	printf("Fitting predictive model...\n");	
 	TLogRegFit LRFit;
-	PLogRegPredict LRModel = LRFit.CalcLogRegNewton(XV, YV);
-	printf(" Done.\n");
+	PLogRegPredict LRModel = LRFit.CalcLogRegNewton(XV, YV);	
 	
-	LRModel->GetTheta(theta);	
+	LRModel->GetTheta(theta);
+	printf("LogReg-based predictor is built.\n");
 	return;
 }
 
@@ -127,11 +130,13 @@ void TCTMSProbabilisticInference::build() {
 		const double Surp = (actualCTMSsCnt(feaStr) - ExpCnt) / sqrt(AllTriadsCnt*TriadProb*(1.0 - TriadProb));
 		theta[t] = Surp;
 	}
-	normalize(theta);	
+	normalize(theta);
+	printf("CTMS-based predictor is built.\n");
 	return;
 }
 
 void TCTMSProbabilisticInferenceLocal::build() {
+	printf("LCTMS-based predictor is built.\n");
 	return;
 }
 
