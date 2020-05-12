@@ -15,7 +15,7 @@ This project provides 8(+1) sign prediction methods that are used in [\[1\]](#ac
 ## Compiling CTMS
 
 In order to compile the source codes and build `convertmain`, `extractormain`, `predictormain`, `analyzermain`
-and `ctmsmain`, use following commands:
+and `ctmsmain`, use following commands[*]:
 ```
 ~/snap/contrib/iasbs_sharif-ctms$ make all
 ```
@@ -27,7 +27,7 @@ or build them separately:
 ~/snap/contrib/iasbs_sharif-ctms/analyzer$ make
 ~/snap/contrib/iasbs_sharif-ctms/ctms$ make
 ```
-
+[*] Visual studio files are also included.
 ## Project Structure
 ### [ctms](ctms)
 - `ctmsmain` is an all-inclusive module to apply all of the methods in cross validation based experiments.
