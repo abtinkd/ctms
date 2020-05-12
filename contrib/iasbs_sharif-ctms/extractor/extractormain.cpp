@@ -48,12 +48,12 @@ void GetMaskEdges(const PCtmsNet& OrigNet, TIntTrV& outputEdges,
 
 int main(int argc, char* argv[]) {
 	if (argc < 4) {
-		cout << "missing arguments:" << endl;
+		cout << "Following arguments are needed to extract the *test edges* from the network:" << endl;
 		cout << "arg1 -- source file path" << endl;
 		cout << "arg2 -- output file name" << endl;
 		cout << "arg3 -- minimum embeddedness" << endl;
 		cout << "arg4 -- balanced or not?(1/0) [optional]" << endl;
-		cout << "arg5 -- 0< sample size <=100 [optional]" << endl;
+		cout << "arg5 -- 0 < sample size <= 100 [optional]" << endl;
 		cout << "arg6 -- maximum embeddedness [optional]" << endl;
 		return 1;
 	}
@@ -88,54 +88,54 @@ int main(int argc, char* argv[]) {
 		maskE[i].GetVal3() == 1 ? ++pos : 1;
 	}
 	
-	const string outputFilePathNet = "out/train_" + outputFileName;
-	const string outputFilePathEdg = "out/lables_" + outputFileName;
-	const string outputFilePathUsg = "out/test_" + outputFileName;
+	const string outputTrainFilePath = "out/train_" + outputFileName;
+	const string outputLabelsFilePath = "out/lables_" + outputFileName;
+	const string outputTestFilePath = "out/test_" + outputFileName;
 	cout << "saving ..." << endl;
-	cout << outputFilePathNet << endl;
-	cout << outputFilePathEdg << endl;
-	cout << outputFilePathUsg << endl;
+	cout << outputTrainFilePath << endl;
+	cout << outputLabelsFilePath << endl;
+	cout << outputTestFilePath << endl;
 	
-	ofstream outputFileNet, outputFileEdg, outputFileUsg;
-	outputFileNet.open(outputFilePathNet);
-	outputFileEdg.open(outputFilePathEdg);
-	outputFileUsg.open(outputFilePathUsg);
-	outputFileNet << "# source net : " << sourceFilePath << endl;
-	outputFileEdg << "# source net : " << sourceFilePath << endl;
-	outputFileUsg << "# source net : " << sourceFilePath << endl;
-	outputFileNet << "# complement net: " << outputFilePathEdg << endl;
-	outputFileEdg << "# complement net: " << outputFilePathNet << endl;
-	outputFileUsg << "# complement net: " << outputFilePathNet << endl;
+	ofstream outputTrainFile, outputLabelsFile, outputTestFile;
+	outputTrainFile.open(outputTrainFilePath);
+	outputLabelsFile.open(outputLabelsFilePath);
+	outputTestFile.open(outputTestFilePath);
+	outputTrainFile << "# source net : " << sourceFilePath << endl;
+	outputLabelsFile << "# source net : " << sourceFilePath << endl;
+	outputTestFile << "# source net : " << sourceFilePath << endl;
+	outputTrainFile << "# complement net: " << outputLabelsFilePath << endl;
+	outputLabelsFile << "# complement net: " << outputTrainFilePath << endl;
+	outputTestFile << "# complement net: " << outputTrainFilePath << endl;
 	
-	outputFileEdg << "# minimum embeddedness: " << minEm << endl;
-	outputFileUsg << "# minimum embeddedness: " << minEm << endl;
+	outputLabelsFile << "# minimum embeddedness: " << minEm << endl;
+	outputTestFile << "# minimum embeddedness: " << minEm << endl;
 	if (maxEm != TInt::Mx) {		
-		outputFileEdg << "# maximum embeddedness: " << maxEm << endl;
-		outputFileUsg << "# maximum embeddedness: " << maxEm << endl;
+		outputLabelsFile << "# maximum embeddedness: " << maxEm << endl;
+		outputTestFile << "# maximum embeddedness: " << maxEm << endl;
 	}
-	outputFileEdg << "# is balanced? " << (isBalanced? 'Y' : 'N') << endl;
-	outputFileUsg << "# is balanced? " << (isBalanced ? 'Y' : 'N') << endl;
-	outputFileEdg << "# sampling rate: " << sampleFraction << endl;
-	outputFileUsg << "# sampling rate: " << sampleFraction << endl;
-	outputFileEdg << "# edge count: " << subnetEcount << endl;
-	outputFileUsg << "# edge count: " << subnetEcount << endl;
-	outputFileEdg << "# positive edge ratio: " << 1.0 * pos / subnetEcount << endl;
-	outputFileUsg << "# positive edge ratio: " << 1.0 * pos / subnetEcount << endl;
-	outputFileEdg << "# FromNodeId ToNodeId	Sign" << endl;
-	outputFileUsg << "# FromNodeId ToNodeId" << endl;
+	outputLabelsFile << "# is balanced? " << (isBalanced? 'Y' : 'N') << endl;
+	outputTestFile << "# is balanced? " << (isBalanced ? 'Y' : 'N') << endl;
+	outputLabelsFile << "# sampling rate: " << sampleFraction << endl;
+	outputTestFile << "# sampling rate: " << sampleFraction << endl;
+	outputLabelsFile << "# edge count: " << subnetEcount << endl;
+	outputTestFile << "# edge count: " << subnetEcount << endl;
+	outputLabelsFile << "# positive edge ratio: " << 1.0 * pos / subnetEcount << endl;
+	outputTestFile << "# positive edge ratio: " << 1.0 * pos / subnetEcount << endl;
+	outputLabelsFile << "# FromNodeId ToNodeId	Sign" << endl;
+	outputTestFile << "# FromNodeId ToNodeId" << endl;
 	
 	for (int i = 0; i < maskE.Len(); i++) {
 		sourceNet->DelEdge(maskE[i].GetVal1(), maskE[i].GetVal2());
-		outputFileEdg << maskE[i].GetVal1() << "\t" << maskE[i].GetVal2() <<
+		outputLabelsFile << maskE[i].GetVal1() << "\t" << maskE[i].GetVal2() <<
 			"\t" << maskE[i].GetVal3() << endl;
-		outputFileUsg << maskE[i].GetVal1() << "\t" << maskE[i].GetVal2() << endl;
+		outputTestFile << maskE[i].GetVal1() << "\t" << maskE[i].GetVal2() << endl;
 	}
-	outputFileEdg.close();
-	outputFileUsg.close();
+	outputLabelsFile.close();
+	outputTestFile.close();
 
 	for (TSignNet::TEdgeI EI = sourceNet->BegEI(); EI < sourceNet->EndEI(); EI++) {
-		outputFileNet << EI.GetSrcNId() << "\t" << EI.GetDstNId() <<
+		outputTrainFile << EI.GetSrcNId() << "\t" << EI.GetDstNId() <<
 			"\t" << EI.GetDat() << endl;
 	}
-	outputFileNet.close();	
+	outputTrainFile.close();	
 }
