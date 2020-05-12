@@ -246,26 +246,32 @@ int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desN
 		if (network->IsEdge(desNId, NbrV[n]))
 			edges.Add(TIntPr(desNId, NbrV[n]));
 	}
-	PCtmsNet localnet;
+	PCtmsNet localnet = new TCtmsNet();
 	for (int i = 0; i < edges.Len(); i++) {
-		TIntPr edge = edges[i];
-		if (!localnet->IsNode(edge.Val1))
-			localnet->AddNode(edge.Val1);
-		if (!localnet->IsNode(edge.Val2))
-			localnet->AddNode(edge.Val2);
-		localnet->AddEdge(edge.Val1, edge.Val2, network->GetEDat(edge.Val1, edge.Val2));
+		const TInt sid = edges[i].Val1;
+		const TInt did = edges[i].Val2;
+		if (!localnet->IsNode(sid))
+			localnet->AddNode(sid);
+		if (!localnet->IsNode(did))
+			localnet->AddNode(did);
+		localnet->AddEdge(sid, did, network->GetEDat(sid, did));
+		TIntV NbrV;
+		TSnap::GetCmnNbrs(network, sid, did, NbrV);
+		for (int n = 0; n < NbrV.Len(); n++) {
+			if (!localnet->IsNode(NbrV[n]))
+				localnet->AddNode(NbrV[n]);
+			if (network->IsEdge(sid, NbrV[n]))
+				localnet->AddEdge(sid, NbrV[n], network->GetEDat(sid, NbrV[n]));
+			if (network->IsEdge(NbrV[n], sid))
+				localnet->AddEdge(NbrV[n], sid, network->GetEDat(NbrV[n], sid));
+			if (network->IsEdge(NbrV[n], did))
+				localnet->AddEdge(NbrV[n], did, network->GetEDat(NbrV[n], did));
+			if (network->IsEdge(did, NbrV[n]))
+				localnet->AddEdge(did, NbrV[n], network->GetEDat(did, NbrV[n]));
+		}
 	}
-	/*const TSignNet::TNodeI SrcNI = network->GetNI(srcNId);
-	const TSignNet::TNodeI DesNI = network->GetNI(desNId);	
-	for (int i = 0; i < SrcNI.GetOutDeg(); i++)
-		edges.Add(TIntPr(SrcNI.GetId(), SrcNI.GetOutNId(i)));
-	for (int i = 0; i < DesNI.GetOutDeg(); i++)
-		edges.Add(TIntPr(DesNI.GetId(), DesNI.GetOutNId(i)));
-	for (int i = 0; i < SrcNI.GetInDeg(); i++)
-		edges.Add(TIntPr(SrcNI.GetInNId(i), SrcNI.GetId()));
-	for (int i = 0; i < DesNI.GetInDeg(); i++)
-		edges.Add(TIntPr(DesNI.GetInNId(i), DesNI.GetId()));
-*/
+	if (localnet.Empty())
+		return 0;
 	TSignPredictor* predictor = new TCTMSProbabilisticInference(localnet);	
 	predictor->build();
 	return predictor->predict(srcNId, desNId);
