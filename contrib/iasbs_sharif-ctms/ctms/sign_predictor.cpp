@@ -103,6 +103,7 @@ void TCTMSProbabilisticInference::build() {
 		}
 		if (c++%ECnt == 0) { printf("\r%d%%", c / ECnt); }
 	}
+	printf("\r%d%%\n", 100);
 	double p0 = PosEListSize / (double)network->GetEdges();
 	for (int t = 0; t < theta.Len(); t++) {
 		const TChA feaStr = theta.GetKey(t);
@@ -235,8 +236,20 @@ int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desN
 	
 	// calculating theta based on local data
 	TIntPrV edges;
-	const TSignNet::TNodeI SrcNI = network->GetNI(srcNId);
-	const TSignNet::TNodeI DesNI = network->GetNI(desNId);
+	TIntV NbrV;
+	TSnap::GetCmnNbrs(network, srcNId, desNId, NbrV);
+	for (int n = 0; n < NbrV.Len(); n++) {
+		if (network->IsEdge(srcNId, NbrV[n]))
+			edges.Add(TIntPr(srcNId, NbrV[n]));
+		if (network->IsEdge(NbrV[n], srcNId))
+			edges.Add(TIntPr(NbrV[n], srcNId));
+		if (network->IsEdge(NbrV[n], desNId))
+			edges.Add(TIntPr(NbrV[n], desNId));
+		if (network->IsEdge(desNId, NbrV[n]))
+			edges.Add(TIntPr(desNId, NbrV[n]));
+	}
+	/*const TSignNet::TNodeI SrcNI = network->GetNI(srcNId);
+	const TSignNet::TNodeI DesNI = network->GetNI(desNId);	
 	for (int i = 0; i < SrcNI.GetOutDeg(); i++)
 		edges.Add(TIntPr(SrcNI.GetId(), SrcNI.GetOutNId(i)));
 	for (int i = 0; i < DesNI.GetOutDeg(); i++)
@@ -245,7 +258,7 @@ int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desN
 		edges.Add(TIntPr(SrcNI.GetInNId(i), SrcNI.GetId()));
 	for (int i = 0; i < DesNI.GetInDeg(); i++)
 		edges.Add(TIntPr(DesNI.GetInNId(i), DesNI.GetId()));
-
+*/
 	static TTriadEqClasH fe;
 	if (fe.Empty())
 		TCtmsNet::GenTriadEquivClasses(fe);	
