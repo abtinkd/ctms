@@ -1,4 +1,4 @@
-## Execute CTMS example
+## Example for cross validation based experiments
 Run project on the *testnet* dataset with following instructions:
 - 1st argument after `ctmsmain` is the path to the network file.
 - 2nd argument after `ctmsmain` shows the minimum embeddedness required for the edges that are involved in the predictions.
