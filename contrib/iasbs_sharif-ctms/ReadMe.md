@@ -36,7 +36,7 @@ or build them separately:
 - `ml` has the implementations for logistic regression optimizer.
 
 ### [extractor](extractor)
-- This project can be used to generate *train* and *test* datasets from an arbitrary network. The arguments for `extractormain`, specifiy the properties of the edges that are considered for the test dataset. Rest of the edges in the network are used for the training dataset.
+- This project can be used to generate *train* and *test* datasets from an arbitrary network. The arguments for `extractormain`, specifiy the properties of the edges that are considered for the *test* dataset. Rest of the edges in the network are used for the *train* dataset.
 - Arguments:
 ```
 arg1 -- source file path
