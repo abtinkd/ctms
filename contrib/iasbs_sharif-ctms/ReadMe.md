@@ -4,7 +4,7 @@ This project addresses the link sign prediction problem in signed networks. In t
 
 *CTMS* is simply a graph of three nodes and related edges in a way that every two nodes are connected. Edges in these small graphs can be signed or unsigned, directed or undirected. Two CTMSs are said to be equivalent if they represent the same graph when we ignore node labels. According to [\[1\]](#acknowledgments), we can have 96 distinct types of signed directed CTMSs. For example, +o|+o|+o and o+|o+|o+ are showing the same CTMS but they are different from +o|o+|+o. In this paper, it is shown that by looking at the distribution of these 96 classes of CTMSs throughout the network, we can predict the sign of a newly formed edge.
 
-This project is providing 8 sign prediction methods that are used in [\[1\]](#acknowledgments) and the libraries that are used to extract features, build models and make predictions. The datasets that are used in this project are [Epinions](http://snap.stanford.edu/data/soc-sign-epinions.html), [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html) and [Wikipedia](http://snap.stanford.edu/data/wiki-Elec.html) and are taken from [Stanford Dataset Collection](http://snap.stanford.edu/data/index.html#signnets). However, any *network.txt* file with the following format can be used as the network.
+This project provides 8(+1) sign prediction methods that are used in [\[1\]](#acknowledgments). These methods are implemented as part of the `ctms` library. The datasets that are used in this project are [Epinions](http://snap.stanford.edu/data/soc-sign-epinions.html), [Slashdot](http://snap.stanford.edu/data/soc-sign-Slashdot090221.html) and [Wikipedia](http://snap.stanford.edu/data/wiki-Elec.html) and are taken from [Stanford Dataset Collection](http://snap.stanford.edu/data/index.html#signnets). In addition, there are three main sub-projects that provide the capability of applying these methods on an arbitrary *network.txt* file with the following format:
 #### Example of a network with two +,- edges
 ```
 #\tFromNodeId\tToNodeId\tSign
@@ -14,7 +14,7 @@ This project is providing 8 sign prediction methods that are used in [\[1\]](#ac
 
 ## Compiling CTMS
 
-In order to compile the source codes and build `convertmain`
+In order to compile the source codes and build `convertmain`, `extractormain`, `predictormain`, `analyzermain`
 and `ctmsmain`, use following commands:
 ```
 ~/snap/contrib/iasbs_sharif-ctms$ make all
@@ -22,60 +22,60 @@ and `ctmsmain`, use following commands:
 or build them separately:
 ```
 ~/snap/contrib/iasbs_sharif-ctms/converter$ make
+~/snap/contrib/iasbs_sharif-ctms/extractor$ make
+~/snap/contrib/iasbs_sharif-ctms/predictor$ make
+~/snap/contrib/iasbs_sharif-ctms/analyzer$ make
 ~/snap/contrib/iasbs_sharif-ctms/ctms$ make
 ```
 
 ## Project Structure
 ### [ctms](ctms)
-- `ctmsmain` is the main file to run all of the methods.
+- `ctmsmain` is an all-inclusive module to apply all of the methods in cross validation based experiments.
 - `ctmsnet` is the extended version of `snap-exp/signnet` augmented with various classes of CTMS and some improvements on signnet.
-- `sign_prediction` has the implementations for sign prediction methods.
+- `sign_prediction` has the implementations of cross validation based experiments.
 - `ml` has the implementations for logistic regression optimizer.
 
+### [extractor](extractor)
+- This project can be used to generate *train* and *test* datasets from an arbitrary network. The arguments for `extractormain`, specifiy the properties of the edges that are considered for the test dataset. Rest of the edges in the network are used for the training dataset.
+- Arguments:
+```
+arg1 -- source file path
+arg2 -- output file name
+arg3 -- minimum embeddedness
+arg4 -- balanced or not?(1/0) [optional]
+arg5 -- 0< sample size <=100 [optional]
+arg6 -- maximum embeddedness [optional]
+```
+
+### [predictor](predictor)
+- This project can be used to predict the signs of unlabeled edges (test data) using methods discussed in the paper.
+- Arguments:
+```
+arg1 -- algorithm:
+   1 <- generative-based
+   2 <- receptive-based
+   3 <- compound-based
+   4 <- weighted generative receptive combination
+   5 <- heuristic balance
+   6 <- heuristic status
+   7 <- logistic regression
+   8 <- CTMS
+   9 <- Local CTMS (not included in the paper-- SLOW!!!)
+arg2 -- train file path
+arg3 -- test file path
+arg4 -- predictions file name
+```
+
+### [analyzer](analyzer)
+- This project can be used to benchmark the performance of each method based on true labels and predicted ones.
+- Arguments:
+```
+arg1 -- true lables file path
+arg2 -- prediction file path
+```
+
 ### [converter](converter)
-
 - `convertmain` and `convert_wikipedia` are used to convert wikipedia file format.
-
-
-## Execute CTMS example
-Run project on the *testnet* dataset with following instructions:
-- 1st argument after `ctmsmain` is the path to the network file.
-- 2nd argument after `ctmsmain` shows the minimum embeddedness required for the edges that are involved in the predictions.
-- 3rd argument after `ctmsmain` is used to force a subnet of equal positive and negative edges.
-
-After network is built, you will be able to set the prediction method and setting a network name to log features.
-
-```
-~/snap/contrib/iasbs_sharif-ctms/ctms$ ctmsmain ./data/testnet.txt 1 0
-input file: ./data/testnet.txt
-minimum embeddedness: 1
-limit to a random subnet of balanced edge signs: no
-loading full network ...
-extracting sub network ...
-  fullnet edge count: 9011
-  sub-net edge count: 7726
-  positive edge ratio:  0.83
-Methods: All(0) NAIVE(1) CTMS(2) LogReg(3) BALANCE(4) STATUS(5): 2
-Set a net name to enable logging in <./results>. (press Enter to disable it): testnet
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Sign prediction: CTMS-based method (probabilistic inference, 96 CTMS classes)
-
-Extracting edge-feature matrix from the network ...
-100%  [0.39s]
-
-Fold 1   --- --- --- --- --- --- --- --- --- --- --- ---  Time: 0.00s
-Recreating train & test data... COMPLETED
-Calculating Theta ...
-99%[0.01s]
-
-TPR ( 0.94 ), TNR ( 0.53 ).
-Acc: 0.8769
-...
-```
-
-
-
 
 ## Acknowledgments
 
