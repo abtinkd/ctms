@@ -1,5 +1,6 @@
 #include "sign_predictor.h"
 
+TTriadEqClasH TCTMSProbabilisticInference::ctmsEqClasses;
 
 void TNaivePredictor::build() {
 	printf("Naive predictors are built.\n");
@@ -65,12 +66,10 @@ void TLogisticRegression::build() {
 	return;
 }
 
-void TCTMSProbabilisticInference::build() {	
-	TTriadEqClasH fe;
-	TCtmsNet::GenTriadEquivClasses(fe);
-	THash<TChA, TInt> actualCTMSsCnt, CTMSsIfPos, CTMSsIfNeg;	
-	for (int c = 0; c < fe.Len(); c++) { //id <- c+1, triad string <- fe.GetKey(c)
-		const TChA feaStr = fe.GetKey(c);
+void TCTMSProbabilisticInference::build() {
+	THash<TChA, TInt> actualCTMSsCnt, CTMSsIfPos, CTMSsIfNeg;
+	for (int c = 0; c < ctmsEqClasses.Len(); c++) { //id <- c+1, triad string <- fe.GetKey(c)
+		const TChA feaStr = ctmsEqClasses.GetKey(c);
 		theta.AddDat(feaStr, 0.0);
 		actualCTMSsCnt.AddDat(feaStr, 0);
 		CTMSsIfPos.AddDat(feaStr, 0);
@@ -111,8 +110,7 @@ void TCTMSProbabilisticInference::build() {
 		const double TriadProb = ExpCnt / (double)AllTriadsCnt;
 		const double Surp = (actualCTMSsCnt(feaStr) - ExpCnt) / sqrt(AllTriadsCnt*TriadProb*(1.0 - TriadProb));
 		theta[t] = Surp;
-	}	
-	printf("CTMS-based predictor is built.\n");
+	}		
 	return;
 }
 
@@ -234,7 +232,7 @@ int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desN
 	if (!network->IsNode(srcNId) || !network->IsNode(desNId))
 		return 0;
 	
-	// calculating theta based on local data
+	// calculating theta based on local network
 	TIntPrV edges;
 	TIntV NbrV;
 	TSnap::GetCmnNbrs(network, srcNId, desNId, NbrV);
@@ -248,6 +246,15 @@ int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desN
 		if (network->IsEdge(desNId, NbrV[n]))
 			edges.Add(TIntPr(desNId, NbrV[n]));
 	}
+	PCtmsNet localnet;
+	for (int i = 0; i < edges.Len(); i++) {
+		TIntPr edge = edges[i];
+		if (!localnet->IsNode(edge.Val1))
+			localnet->AddNode(edge.Val1);
+		if (!localnet->IsNode(edge.Val2))
+			localnet->AddNode(edge.Val2);
+		localnet->AddEdge(edge.Val1, edge.Val2, network->GetEDat(edge.Val1, edge.Val2));
+	}
 	/*const TSignNet::TNodeI SrcNI = network->GetNI(srcNId);
 	const TSignNet::TNodeI DesNI = network->GetNI(desNId);	
 	for (int i = 0; i < SrcNI.GetOutDeg(); i++)
@@ -259,68 +266,9 @@ int TCTMSProbabilisticInferenceLocal::predict(const TInt srcNId, const TInt desN
 	for (int i = 0; i < DesNI.GetInDeg(); i++)
 		edges.Add(TIntPr(DesNI.GetInNId(i), DesNI.GetId()));
 */
-	static TTriadEqClasH fe;
-	if (fe.Empty())
-		TCtmsNet::GenTriadEquivClasses(fe);	
-	THash<TChA, TInt> actualCTMSsCnt, CTMSsIfPos, CTMSsIfNeg;
-	THash<TChA, TFlt> theta;	
-	for (int c = 0; c < fe.Len(); c++) { //id <- c+1, triad string <- fe.GetKey(c)
-		const TChA feaStr = fe.GetKey(c);
-		theta.AddDat(feaStr, 0.0);
-		actualCTMSsCnt.AddDat(feaStr, 0);
-		CTMSsIfPos.AddDat(feaStr, 0);
-		CTMSsIfNeg.AddDat(feaStr, 0);
-	}	
-	int PosEListSize = 0, AllTriadsCnt = 0;
-	for (int i = 0; i < edges.Len(); i++) {
-		const TIntPr edge(edges[i].Val1, edges[i].Val2);
-		const TInt sign = network->GetEDat(edge.Val1, edge.Val2);
-		if (sign == +1) PosEListSize++;
-		for (int i = 0; i < 3; i++) {
-			if (i == 1)
-				network->SetEDat(edge.Val1, edge.Val2, +1);
-			else if (i == 2)
-				network->SetEDat(edge.Val1, edge.Val2, -1);
-			THash<TChA, TInt> feaValues;
-			extractFeatures(edge, feaValues);
-			for (THashKeyDatI<TChA, TInt> fv = feaValues.BegI(); fv < feaValues.EndI(); fv++) {
-				if (i == 0) {
-					AllTriadsCnt += fv.GetDat();
-					actualCTMSsCnt(fv.GetKey()) += fv.GetDat();
-				}
-				else if (i == 1)
-					CTMSsIfPos(fv.GetKey()) += fv.GetDat();
-				else if (i == 2)
-					CTMSsIfNeg(fv.GetKey()) += fv.GetDat();
-			}
-			network->SetEDat(edge.Val1, edge.Val2, sign);
-		}		
-	}
-	double p0 = PosEListSize / (double)edges.Len();
-	for (int t = 0; t < theta.Len(); t++) {
-		const TChA feaStr = theta.GetKey(t);
-		const double ExpCnt = 1 + p0 * CTMSsIfPos(feaStr) + (1 - p0) * CTMSsIfNeg(feaStr);
-		const double TriadProb = ExpCnt / (double)AllTriadsCnt;
-		const double Surp = (actualCTMSsCnt(feaStr) - ExpCnt) / sqrt(AllTriadsCnt*TriadProb*(1.0 - TriadProb));
-		theta[t] = Surp;
-	}	
-	// end of calculation
-
-	const TIntPr edge(srcNId, desNId);
-	network->AddEdge(srcNId, desNId, +1);
-	THash<TChA, TInt> fvIfPositive;
-	extractFeatures(edge, fvIfPositive);
-	network->SetEDat(srcNId, desNId, -1);
-	THash<TChA, TInt> fvIfNegative;
-	extractFeatures(edge, fvIfNegative);
-	network->DelEdge(srcNId, desNId);
-
-	double posTrend = 0.0, negTrend = 0.0;
-	for (THashKeyDatI<TChA, TInt> fv = fvIfPositive.BegI(); fv < fvIfPositive.EndI(); fv++)
-		posTrend += theta.GetDat(fv.GetKey()) * fv.GetDat();
-	for (THashKeyDatI<TChA, TInt> fv = fvIfNegative.BegI(); fv < fvIfNegative.EndI(); fv++)
-		negTrend += theta.GetDat(fv.GetKey()) * fv.GetDat();
-	return posTrend >= negTrend ? 1 : -1;
+	TSignPredictor* predictor = new TCTMSProbabilisticInference(localnet);	
+	predictor->build();
+	return predictor->predict(srcNId, desNId);
 }
 
 void TLogisticRegression::extractFeatures(const TIntPr& edge,

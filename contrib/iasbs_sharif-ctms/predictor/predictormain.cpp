@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 			"   6 <- heuristic status" << endl <<
 			"   7 <- logistic regression" << endl <<
 			"   8 <- CTMS" << endl <<
-			"   9 <- Local CTMS (not included in the paper-- SLOW!!!)" << endl;
+			"   9 <- Local CTMS (not included in the paper)" << endl;
 		cout << "arg2 -- train file path" << endl;
 		cout << "arg3 -- test file path" << endl;
 		cout << "arg4 -- predictions file name" << endl;		

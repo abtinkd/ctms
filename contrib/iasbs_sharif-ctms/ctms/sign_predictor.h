@@ -51,12 +51,16 @@ public:
 	int predict(const TInt srcNId, const TInt desNId);
 };
 
-class TCTMSProbabilisticInference : public TSignPredictor {
-protected:
+class TCTMSProbabilisticInference : public TSignPredictor {	
+protected:	
+	static TTriadEqClasH ctmsEqClasses;
 	THash<TChA, TFlt> theta;
 	void extractFeatures(const TIntPr& edge, THash<TChA, TInt>& edgeFeaValues);
 public:
-	TCTMSProbabilisticInference(const PCtmsNet& net) : TSignPredictor(net) {}
+	TCTMSProbabilisticInference(const PCtmsNet& net) : TSignPredictor(net) {
+		if (ctmsEqClasses.Empty())
+			TCtmsNet::GenTriadEquivClasses(ctmsEqClasses);
+	}
 	void build();
 	int predict(const TInt srcNId, const TInt desNId);
 };
