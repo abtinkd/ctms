@@ -75,8 +75,7 @@ void TLogisticRegression::build() {
 	TLogRegFit LRFit;
 	PLogRegPredict LRModel = LRFit.CalcLogRegNewton(XV, YV);
 	printf(" Done.\n");
-
-	TFltV theta;
+	
 	LRModel->GetTheta(theta);	
 	return;
 }
@@ -222,7 +221,7 @@ int TLogisticRegression::predict(const TInt srcNId, const TInt desNId) {
 	X.Add(values);
 	TFltV Result;
 	TLogRegPredict::GetCfy(X, Result, theta);
-	return (Result[0] <= 0.50000000) ? -1 : +1;
+	return (Result[0] < 0.50000000) ? -1 : +1;
 }
 
 int TCTMSProbabilisticInference::predict(const TInt srcNId, const TInt desNId) {
