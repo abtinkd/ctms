@@ -16,7 +16,7 @@ public:
 
 class TNaivePredictor : public TSignPredictor {
 protected:
-	const char* pType;
+	const std::string pType;
 public:
 	TNaivePredictor(const PCtmsNet& net, const char* type) : TSignPredictor(net), pType(type) {}
 	void build();
