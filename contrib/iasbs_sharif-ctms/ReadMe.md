@@ -48,7 +48,7 @@ arg6 -- maximum embeddedness [optional]
 ```
 
 ### [predictor](predictor)
-- This project can be used to predict the signs of unlabeled edges (test data) using methods discussed in the paper.
+- This project can be used to predict the signs of unlabeled edges (test data) using methods discussed in the paper. It can also be used as a guide to import the library in other projects.
 - Arguments:
 ```
 arg1 -- algorithm:
