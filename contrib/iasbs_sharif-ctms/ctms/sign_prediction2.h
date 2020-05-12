@@ -44,9 +44,9 @@ protected:
 	THash<TChA, TInt> fe2ix;
 	THash<TInt, TChA> ix2fe;
 	void extractFeatures(const TIntPr& edge, THash<TChA, TInt>& edgeFeaValues);
-	void mapFeature2Index();
+	void mapFeatureToIndex();
 public:
-	TLogisticRegression(const PCtmsNet& net) : TSignPredictor(net) { mapFeature2Index(); }
+	TLogisticRegression(const PCtmsNet& net) : TSignPredictor(net) { mapFeatureToIndex(); }
 	void build();
 	int predict(const TInt srcNId, const TInt desNId);
 };

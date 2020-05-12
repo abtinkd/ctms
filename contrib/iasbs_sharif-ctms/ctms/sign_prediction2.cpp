@@ -31,7 +31,7 @@ void TStatusBasedPredictor::build() {
 	return;
 }
 
-void TLogisticRegression::mapFeature2Index() {
+void TLogisticRegression::mapFeatureToIndex() {
 	const TStr ES[] = { "F", "B" }, SS[] = { "p", "n" };
 	TInt index = 0;
 	for (int i = 0; i < 2; i++) {
@@ -53,8 +53,9 @@ void TLogisticRegression::mapFeature2Index() {
 
 void TLogisticRegression::build() {
 	TVec<TFltV> XV;
-	TFltV YV;	
-	int c = 0, ECnt = (network->GetEdges() / 100) + 1;	
+	TFltV YV;
+	printf("Extracting feature values...\n");
+	int c = 0, ECnt = (network->GetEdges() / 100) + 1;
 	for (TSignNet::TEdgeI EI = network->BegEI(); EI < network->EndEI(); EI++) {
 		const TIntPr edge(EI.GetSrcNId(), EI.GetDstNId());
 		THash<TChA, TInt> edgeFeaValues;
@@ -65,19 +66,18 @@ void TLogisticRegression::build() {
 			values[fe2ix.GetDat(feature)] = edgeFeaValues.GetDat(feature);
 		}
 		XV.Add(values);
-		const int sign = network->GetEDat(edge.Val1, edge.Val2);
-		YV.Add((sign == 1) ? 1.0 : -1.0);
+		const int sign = network->GetEDat(edge.Val1, edge.Val2);		
+		YV.Add((sign == -1) ? 0 : 1);
 		if (c++%ECnt == 0) {printf("\r%d%%", c / ECnt);}
 	}
-
-	//printf("Fitting Prediction Model...");	
+	printf("\r%d%%\n", 100);
+	printf("Fitting predictive model...\n");	
 	TLogRegFit LRFit;
 	PLogRegPredict LRModel = LRFit.CalcLogRegNewton(XV, YV);
-	//printf(" COMPLETED\n");
+	printf(" Done.\n");
 
 	TFltV theta;
-	LRModel->GetTheta(theta);
-	// normalize(theta);
+	LRModel->GetTheta(theta);	
 	return;
 }
 
