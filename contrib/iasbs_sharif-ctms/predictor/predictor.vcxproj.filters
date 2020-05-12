@@ -30,7 +30,7 @@
     <ClCompile Include="..\..\..\snap-exp\signnet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ctms\sign_prediction2.cpp">
+    <ClCompile Include="..\ctms\sign_predictor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClInclude Include="..\..\..\snap-exp\signnet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ctms\sign_prediction2.h">
+    <ClInclude Include="..\ctms\sign_predictor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -129,7 +129,6 @@
     <ClCompile Include="ctmsnet.cpp" />
     <ClCompile Include="ml.cpp" />
     <ClCompile Include="sign_prediction.cpp" />
-    <ClCompile Include="sign_prediction2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\snap-core\Snap.h" />
@@ -137,7 +136,6 @@
     <ClInclude Include="ctmsnet.h" />
     <ClInclude Include="ml.h" />
     <ClInclude Include="sign_prediction.h" />
-    <ClInclude Include="sign_prediction2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

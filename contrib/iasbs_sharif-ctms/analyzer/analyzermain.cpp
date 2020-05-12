@@ -69,5 +69,5 @@ int main(int argc, char* argv[]) {
 	const double tnr = 1.0 * tn / (tn + fp);
 	cout << "TNR: " << tnr << endl;
 	cout << "Accuracy: " << 1.0 * (tp + tn) / (tp + tn + fp + fn) << endl;
-	cout << "Mean(TPR, TNR): " << (tpr + tnr) / 2.0 << endl;	
+	cout << "Mean(TPR, TNR): " << (tpr + tnr) / 2.0 << endl;		
 }

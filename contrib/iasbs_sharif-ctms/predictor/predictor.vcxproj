@@ -127,7 +127,7 @@
     <ClCompile Include="..\..\..\snap-exp\signnet.cpp" />
     <ClCompile Include="..\ctms\ctmsnet.cpp" />
     <ClCompile Include="..\ctms\ml.cpp" />
-    <ClCompile Include="..\ctms\sign_prediction2.cpp" />
+    <ClCompile Include="..\ctms\sign_predictor.cpp" />
     <ClCompile Include="predictormain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -135,7 +135,7 @@
     <ClInclude Include="..\..\..\snap-exp\signnet.h" />
     <ClInclude Include="..\ctms\ctmsnet.h" />
     <ClInclude Include="..\ctms\ml.h" />
-    <ClInclude Include="..\ctms\sign_prediction2.h" />
+    <ClInclude Include="..\ctms\sign_predictor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

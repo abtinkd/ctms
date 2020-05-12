@@ -4,7 +4,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <ctmsnet.h>
-#include <sign_prediction2.h>
+#include <sign_predictor.h>
 
 using namespace std;
 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 			"   6 <- heuristic status" << endl <<
 			"   7 <- logistic regression" << endl <<
 			"   8 <- CTMS" << endl <<
-			"   9 <- Local CTMS (not included in the paper)" << endl;
+			"   9 <- Local CTMS (not included in the paper-- SLOW!!!)" << endl;
 		cout << "arg2 -- train file path" << endl;
 		cout << "arg3 -- test file path" << endl;
 		cout << "arg4 -- predictions file name" << endl;		
